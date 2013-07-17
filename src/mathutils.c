@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2009 Paul Brossier <piem@aubio.org>
+  Copyright (C) 2003-2013 Paul Brossier <piem@aubio.org>
 
   This file is part of aubio.
 
@@ -43,13 +43,21 @@ typedef enum
 } aubio_window_type;
 
 fvec_t *
-new_aubio_window (char_t * window_type, uint_t size)
+new_aubio_window (char_t * window_type, uint_t length)
 {
-  fvec_t * win = new_fvec (size);
+  fvec_t * win = new_fvec (length);
+  fvec_set_window (win, window_type);
+  return win;
+}
+
+uint_t fvec_set_window (fvec_t *win, char_t *window_type) {
   smpl_t * w = win->data;
-  uint_t i;
+  uint_t i, size = win->length;
   aubio_window_type wintype;
-  if (strcmp (window_type, "rectangle") == 0)
+  if (window_type == NULL) {
+      AUBIO_ERR ("window type can not be null.\n");
+      return 1;
+  } else if (strcmp (window_type, "rectangle") == 0)
       wintype = aubio_win_rectangle;
   else if (strcmp (window_type, "hamming") == 0)
       wintype = aubio_win_hamming;
@@ -70,8 +78,8 @@ new_aubio_window (char_t * window_type, uint_t size)
   else if (strcmp (window_type, "default") == 0)
       wintype = aubio_win_default;
   else {
-      AUBIO_ERR ("unknown window type %s, using default.\n", window_type);
-      wintype = aubio_win_default;
+      AUBIO_ERR ("unknown window type `%s`.\n", window_type);
+      return 1;
   }
   switch(wintype) {
     case aubio_win_rectangle:
@@ -104,21 +112,29 @@ new_aubio_window (char_t * window_type, uint_t size)
           - 0.01168 * COS(3.0*TWO_PI*i/(size-1.0));
       break;
     case aubio_win_gaussian:
-      for (i=0;i<size;i++)
-        w[i] = EXP(- 1.0 / SQR(size) * SQR(2.0*i-size));
+      {
+        lsmp_t a, b, c = 0.5;
+        uint_t n;
+        for (n = 0; n < size; n++)
+        {
+          a = (n-c*(size-1))/(SQR(c)*(size-1));
+          b = -c*SQR(a);
+          w[n] = EXP(b);
+        }
+      }
       break;
     case aubio_win_welch:
       for (i=0;i<size;i++)
-        w[i] = 1.0 - SQR((2*i-size)/(size+1.0));
+        w[i] = 1.0 - SQR((2.*i-size)/(size+1.0));
       break;
     case aubio_win_parzen:
       for (i=0;i<size;i++)
-        w[i] = 1.0 - ABS((2*i-size)/(size+1.0));
+        w[i] = 1.0 - ABS((2.*i-size)/(size+1.0));
       break;
     default:
       break;
   }
-  return win;
+  return 0;
 }
 
 smpl_t
@@ -363,6 +379,18 @@ smpl_t fvec_quadint (fvec_t * x, uint_t pos) {
   return pos + 0.5 * (s2 - s0 ) / (s2 - 2.* s1 + s0);
 }
 
+smpl_t fvec_quadratic_peak_pos (fvec_t * x, uint_t pos) {
+  smpl_t s0, s1, s2;
+  uint_t x0 = (pos < 1) ? pos : pos - 1;
+  uint_t x2 = (pos + 1 < x->length) ? pos + 1 : pos;
+  if (x0 == pos) return (x->data[pos] <= x->data[x2]) ? pos : x2;
+  if (x2 == pos) return (x->data[pos] <= x->data[x0]) ? pos : x0;
+  s0 = x->data[x0];
+  s1 = x->data[pos];
+  s2 = x->data[x2];
+  return pos + 0.5 * (s0 - s2 ) / (s0 - 2.* s1 + s2);
+}
+
 uint_t fvec_peakpick(fvec_t * onset, uint_t pos) {
   uint_t tmp=0;
   tmp = (onset->data[pos] > onset->data[pos-1]
@@ -382,6 +410,7 @@ aubio_quadfrac (smpl_t s0, smpl_t s1, smpl_t s2, smpl_t pf)
 smpl_t
 aubio_freqtomidi (smpl_t freq)
 {
+  if (freq < 2. || freq > 100000.) return 0.; // avoid nans and infs
   /* log(freq/A-2)/log(2) */
   smpl_t midi = freq / 6.875;
   midi = LOG (midi) / 0.69314718055995;
@@ -393,6 +422,7 @@ aubio_freqtomidi (smpl_t freq)
 smpl_t
 aubio_miditofreq (smpl_t midi)
 {
+  if (midi > 140.) return 0.; // avoid infs
   smpl_t freq = (midi + 3.) / 12.;
   freq = EXP (freq * 0.69314718055995);
   freq *= 6.875;
@@ -403,7 +433,7 @@ smpl_t
 aubio_bintofreq (smpl_t bin, smpl_t samplerate, smpl_t fftsize)
 {
   smpl_t freq = samplerate / fftsize;
-  return freq * bin;
+  return freq * MAX(bin, 0);
 }
 
 smpl_t
@@ -417,7 +447,7 @@ smpl_t
 aubio_freqtobin (smpl_t freq, smpl_t samplerate, smpl_t fftsize)
 {
   smpl_t bin = fftsize / samplerate;
-  return freq * bin;
+  return MAX(freq, 0) * bin;
 }
 
 smpl_t

@@ -24,172 +24,170 @@ LIB_VERSION = '.'.join \
 
 import os.path, sys
 if os.path.exists('src/config.h') or os.path.exists('Makefile'):
-    print "Please run 'make distclean' using waf"
+    print "Please run 'make distclean' to clean-up autotools files before using waf"
     sys.exit(1)
 
 top = '.'
 out = 'build'
 
-def init(opt):
-  pass
-
-def options(opt):
-  opt.add_option('--enable-double', action='store_true', default=False,
+def options(ctx):
+  ctx.add_option('--enable-double', action='store_true', default=False,
       help='compile aubio in double precision mode')
-  opt.add_option('--disable-fftw', action='store_true', default=False,
-      help='compile with ooura instead of fftw')
-  opt.add_option('--disable-fftw3f', action='store_true', default=False,
-      help='compile with fftw3 instead of fftw3f')
-  opt.add_option('--enable-complex', action='store_true', default=False,
+  ctx.add_option('--enable-fftw3f', action='store_true', default=False,
+      help='compile with fftw3f instead of ooura (recommended)')
+  ctx.add_option('--enable-fftw3', action='store_true', default=False,
+      help='compile with fftw3 instead of ooura (recommended in double precision)')
+  ctx.add_option('--enable-complex', action='store_true', default=False,
       help='compile with C99 complex')
-  opt.add_option('--enable-jack', action='store_true', default=False,
+  ctx.add_option('--enable-jack', action='store_true', default=None,
       help='compile with jack support')
-  opt.add_option('--enable-lash', action='store_true', default=False,
+  ctx.add_option('--enable-lash', action='store_true', default=None,
       help='compile with lash support')
-  opt.add_option('--enable-sndfile', action='store_true', default=False,
+  ctx.add_option('--enable-sndfile', action='store_true', default=None,
       help='compile with libsndfile support')
-  opt.add_option('--enable-samplerate', action='store_true', default=False,
+  ctx.add_option('--enable-samplerate', action='store_true', default=None,
       help='compile with libsamplerate support')
-  opt.add_option('--with-target-platform', type='string',
+  ctx.add_option('--with-target-platform', type='string',
       help='set target platform for cross-compilation', dest='target_platform')
-  opt.load('compiler_cc')
-  opt.load('compiler_cxx')
-  opt.load('gnu_dirs')
-  opt.load('waf_unit_test')
+  ctx.load('compiler_c')
+  ctx.load('waf_unit_test')
 
-def configure(conf):
-  import Options
-  conf.check_tool('compiler_cc')
-  conf.check_tool('compiler_cxx')
-  conf.check_tool('gnu_dirs') # helpful for autotools transition and .pc generation
-  #conf.check_tool('misc') # needed for subst
-  conf.load('waf_unit_test')
+def configure(ctx):
+  from waflib import Options
+  ctx.load('compiler_c')
+  ctx.load('waf_unit_test')
+  ctx.env.CFLAGS += ['-g', '-Wall', '-Wextra']
 
   if Options.options.target_platform:
     Options.platform = Options.options.target_platform
 
   if Options.platform == 'win32':
-    conf.env['shlib_PATTERN'] = 'lib%s.dll'
+    ctx.env['shlib_PATTERN'] = 'lib%s.dll'
+
+  if Options.platform == 'darwin':
+    ctx.env.CFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
+    ctx.env.LINKFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
+    ctx.env.CC = 'llvm-gcc-4.2'
+    ctx.env.LINK_CC = 'llvm-gcc-4.2'
+    ctx.env.FRAMEWORK = ['CoreFoundation', 'AudioToolbox', 'Accelerate']
+    ctx.define('HAVE_ACCELERATE', 1)
+
+  if Options.platform == 'ios':
+    ctx.env.CC = 'clang'
+    ctx.env.LD = 'clang'
+    ctx.env.LINK_CC = 'clang'
+    SDKVER="6.1"
+    DEVROOT="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer"
+    SDKROOT="%(DEVROOT)s/SDKs/iPhoneOS%(SDKVER)s.sdk" % locals()
+    ctx.env.FRAMEWORK = ['CoreFoundation', 'AudioToolbox', 'Accelerate']
+    ctx.define('HAVE_ACCELERATE', 1)
+    ctx.env.CFLAGS += [ '-miphoneos-version-min=6.1', '-arch', 'armv7',
+            '--sysroot=%s' % SDKROOT]
+    ctx.env.LINKFLAGS += ['-std=c99', '-arch', 'armv7', '--sysroot=%s' %
+            SDKROOT]
 
   # check for required headers
-  conf.check(header_name='stdlib.h')
-  conf.check(header_name='stdio.h')
-  conf.check(header_name='math.h')
-  conf.check(header_name='string.h')
-  conf.check(header_name='limits.h')
-
-  # optionally use complex.h
-  if (Options.options.enable_complex == True):
-    conf.check(header_name='complex.h')
-
-  # check dependencies
-  if (Options.options.enable_sndfile == True):
-    conf.check_cfg(package = 'sndfile', atleast_version = '1.0.4',
-      args = '--cflags --libs')
-  if (Options.options.enable_samplerate == True):
-      conf.check_cfg(package = 'samplerate', atleast_version = '0.0.15',
-        args = '--cflags --libs')
-
-  # double precision mode
-  if (Options.options.enable_double == True):
-    conf.define('HAVE_AUBIO_DOUBLE', 1)
-  else:
-    conf.define('HAVE_AUBIO_DOUBLE', 0)
-
-  # check if pkg-config is installed, optional
-  try:
-    conf.find_program('pkg-config', var='PKGCONFIG')
-  except conf.errors.ConfigurationError:
-    conf.msg('Could not find pkg-config', 'disabling fftw, jack, and lash')
-    conf.msg('Could not find fftw', 'using ooura')
-
-  # optional dependancies using pkg-config
-  if conf.env['PKGCONFIG']:
-
-    if (Options.options.disable_fftw == False):
-      # one of fftwf or fftw3f
-      if (Options.options.disable_fftw3f == True):
-        conf.check_cfg(package = 'fftw3', atleast_version = '3.0.0',
-            args = '--cflags --libs')
-      else:
-        # fftw3f not disabled, take most sensible one according to enable_double
-        if (Options.options.enable_double == True):
-          conf.check_cfg(package = 'fftw3', atleast_version = '3.0.0',
-              args = '--cflags --libs')
-        else:
-          conf.check_cfg(package = 'fftw3f', atleast_version = '3.0.0',
-              args = '--cflags --libs')
-      conf.define('HAVE_FFTW3', 1)
-    else:
-      # fftw disabled, use ooura
-      conf.msg('Fftw disabled', 'using ooura')
-      pass
-
-    if (Options.options.enable_jack == True):
-      conf.check_cfg(package = 'jack', atleast_version = '0.15.0',
-      args = '--cflags --libs')
-
-    if (Options.options.enable_lash == True):
-      conf.check_cfg(package = 'lash-1.0', atleast_version = '0.5.0',
-      args = '--cflags --libs', uselib_store = 'LASH')
-
-  # swig
-  try:
-    conf.find_program('swig', var='SWIG')
-  except conf.errors.ConfigurationError:
-    conf.to_log('swig was not found, not looking for (ignoring)')
-  if conf.env['SWIG']:
-    conf.check_tool('swig', tooldir='swig')
-    conf.check_swig_version('1.3.27')
-
-    # python
-    if conf.find_program('python'):
-      conf.check_tool('python')
-      conf.check_python_version((2,4,2))
-      conf.check_python_headers()
+  ctx.check(header_name='stdlib.h')
+  ctx.check(header_name='stdio.h')
+  ctx.check(header_name='math.h')
+  ctx.check(header_name='string.h')
+  ctx.check(header_name='limits.h')
 
   # check support for C99 __VA_ARGS__ macros
   check_c99_varargs = '''
 #include <stdio.h>
 #define AUBIO_ERR(...) fprintf(stderr, __VA_ARGS__)
 '''
-  if conf.check_cc(fragment = check_c99_varargs,
+  if ctx.check_cc(fragment = check_c99_varargs,
       type='cstlib',
       msg = 'Checking for C99 __VA_ARGS__ macro'):
-    conf.define('HAVE_C99_VARARGS_MACROS', 1)
+    ctx.define('HAVE_C99_VARARGS_MACROS', 1)
+
+  # optionally use complex.h
+  if (Options.options.enable_complex == True):
+    ctx.check(header_name='complex.h')
+
+  # check dependencies
+  if (Options.options.enable_sndfile != False):
+      ctx.check_cfg(package = 'sndfile', atleast_version = '1.0.4',
+        args = '--cflags --libs', mandatory = False)
+  if (Options.options.enable_samplerate != False):
+      ctx.check_cfg(package = 'samplerate', atleast_version = '0.0.15',
+        args = '--cflags --libs', mandatory = False)
+
+  # double precision mode
+  if (Options.options.enable_double == True):
+    ctx.define('HAVE_AUBIO_DOUBLE', 1)
+  else:
+    ctx.define('HAVE_AUBIO_DOUBLE', 0)
+
+  # optional dependancies using pkg-config
+  if (Options.options.enable_fftw3 != False or Options.options.enable_fftw3f != False):
+    # one of fftwf or fftw3f
+    if (Options.options.enable_fftw3f != False):
+      ctx.check_cfg(package = 'fftw3f', atleast_version = '3.0.0',
+          args = '--cflags --libs', mandatory = False)
+      if (Options.options.enable_double == True):
+        ctx.msg('Warning', 'fftw3f enabled, but aubio compiled in double precision!')
+    else:
+      # fftw3f not enabled, take most sensible one according to enable_double
+      if (Options.options.enable_double == True):
+        ctx.check_cfg(package = 'fftw3', atleast_version = '3.0.0',
+            args = '--cflags --libs', mandatory = False)
+      else:
+        ctx.check_cfg(package = 'fftw3f', atleast_version = '3.0.0',
+            args = '--cflags --libs', mandatory = False)
+    ctx.define('HAVE_FFTW3', 1)
+  else:
+    # fftw disabled, use ooura
+    if 'HAVE_ACCELERATE' in ctx.env.define_key:
+        ctx.msg('Checking for FFT implementation', 'vDSP')
+    else:
+        ctx.msg('Checking for FFT implementation', 'ooura')
+    pass
+
+  if (Options.options.enable_jack != False):
+    ctx.check_cfg(package = 'jack', atleast_version = '0.15.0',
+    args = '--cflags --libs', mandatory = False)
+
+  if (Options.options.enable_lash != False):
+    ctx.check_cfg(package = 'lash-1.0', atleast_version = '0.5.0',
+    args = '--cflags --libs', uselib_store = 'LASH', mandatory = False)
 
   # write configuration header
-  conf.write_config_header('src/config.h')
+  ctx.write_config_header('src/config.h')
 
   # add some defines used in examples
-  conf.define('AUBIO_PREFIX', conf.env['PREFIX'])
-  conf.define('PACKAGE', APPNAME)
+  ctx.define('AUBIO_PREFIX', ctx.env['PREFIX'])
+  ctx.define('PACKAGE', APPNAME)
 
   # check if docbook-to-man is installed, optional
   try:
-    conf.find_program('docbook-to-man', var='DOCBOOKTOMAN')
-  except conf.errors.ConfigurationError:
-    conf.to_log('docbook-to-man was not found (ignoring)')
+    ctx.find_program('docbook-to-man', var='DOCBOOKTOMAN')
+  except ctx.errors.ConfigurationError:
+    ctx.to_log('docbook-to-man was not found (ignoring)')
 
 def build(bld):
   bld.env['VERSION'] = VERSION
   bld.env['LIB_VERSION'] = LIB_VERSION
 
   # add sub directories
-  bld.add_subdirs('src examples')
-  if bld.env['SWIG']:
-    if bld.env['PYTHON']:
-      bld.add_subdirs('python/aubio python')
+  bld.recurse('src')
+  from waflib import Options
+  if Options.platform != 'ios':
+      bld.recurse('examples')
+      bld.recurse('tests')
 
+  """
   # create the aubio.pc file for pkg-config
-  if bld.env['TARGET_PLATFORM'] == 'linux':
-    aubiopc = bld.new_task_gen('subst')
+  if ctx.env['TARGET_PLATFORM'] == 'linux':
+    aubiopc = ctx.new_task_gen('subst')
     aubiopc.source = 'aubio.pc.in'
     aubiopc.target = 'aubio.pc'
     aubiopc.install_path = '${PREFIX}/lib/pkgconfig'
 
   # build manpages from sgml files
-  if bld.env['DOCBOOKTOMAN']:
+  if ctx.env['DOCBOOKTOMAN']:
     import TaskGen
     TaskGen.declare_chain(
         name    = 'docbooktoman',
@@ -198,44 +196,19 @@ def build(bld):
         ext_out = '.1',
         reentrant = 0,
     )
-    manpages = bld.new_task_gen(name = 'docbooktoman',
-        source=bld.path.ant_glob('doc/*.sgml'))
-    bld.install_files('${MANDIR}/man1', bld.path.ant_glob('doc/*.1'))
+    manpages = ctx.new_task_gen(name = 'docbooktoman',
+        source=ctx.path.ant_glob('doc/*.sgml'))
+    ctx.install_files('${MANDIR}/man1', ctx.path.ant_glob('doc/*.1'))
 
   # install woodblock sound
   bld.install_files('${PREFIX}/share/sounds/aubio/',
       'sounds/woodblock.aiff')
-
-  # build and run the unit tests
-  build_tests(bld)
+  """
 
 def shutdown(bld):
-  pass
-
-# loop over all *.c filenames in tests/src to build them all
-# target name is filename.c without the .c
-def build_tests(bld):
-  for target_name in bld.path.ant_glob('tests/src/**/*.c'):
-    includes = ['src']
-    uselib = []
-    if not str(target_name).endswith('-jack.c'):
-      includes = []
-      uselib = []
-      extra_source = []
-    else:
-      # phasevoc-jack needs jack
-      if bld.env['JACK']:
-        includes = ['examples']
-        uselib = ['JACK']
-        extra_source = ['examples/jackio.c']
-      else:
-        continue
-
-    this_target = bld.new_task_gen(
-        features = 'c cprogram test',
-        uselib = uselib,
-        source = [target_name] + extra_source,
-        target = str(target_name).split('.')[0],
-        includes = ['src'] + includes,
-        defines = 'AUBIO_UNSTABLE_API=1',
-        use = 'aubio')
+    from waflib import Options, Logs
+    if Options.platform == 'ios':
+          msg ='aubio built for ios, contact the author for a commercial license'
+          Logs.pprint('RED', msg)
+          msg ='   Paul Brossier <piem@aubio.org>'
+          Logs.pprint('RED', msg)

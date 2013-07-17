@@ -27,7 +27,6 @@
 #include <string.h>             /* for strcmp */
 #include <aubio.h>
 #include "config.h"
-#include "sndfileio.h"
 #ifdef HAVE_JACK
 #include "jackio.h"
 #endif /* HAVE_JACK */
@@ -65,7 +64,7 @@ extern char_t * pitch_mode;
 
 void send_noteon (int pitch, int velo);
 
-extern const char *output_filename;
+extern const char *sink_uri;
 extern char_t * onset_mode;
 extern smpl_t threshold;
 extern smpl_t silence;

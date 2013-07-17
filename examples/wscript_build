@@ -1,24 +1,18 @@
-if bld.env['SNDFILE']:
-  # build examples
-  sndfileio = bld.new_task_gen(features = 'c',
-      includes = '../src',
-      source = ['sndfileio.c'],
-      target = 'sndfileio')
+# vim:set syntax=python:
 
-  utilsio = bld.new_task_gen(features = 'c',
+# build examples
+utilsio = bld(
+        name = 'utilsio',
+        features = 'c',
         includes = '../src',
-        add_objects = 'sndfileio',
         source = ['utils.c', 'jackio.c'],
-        uselib = ['LASH', 'JACK', 'SNDFILE'],
         target = 'utilsio')
 
-  # loop over all *.c filenames in examples to build them all
-  for target_name in bld.path.ant_glob('*.c', excl = ['utils.c', 'jackio.c', 'sndfileio.c']):
-    bld.new_task_gen(features = 'c cprogram',
-        add_objects = 'utilsio',
-        includes = '../src',
-        uselib = ['LASH', 'JACK', 'SNDFILE'],
-        use = 'aubio',
-        source = target_name,
-        # program name is filename.c without the .c
-        target = str(target_name).split('.')[0])
+# loop over all *.c filenames in examples to build them all
+for source_file in ctx.path.ant_glob('*.c', excl = ['utils.c', 'jackio.c']):
+  bld.program(features = 'c cprogram',
+      includes = '../src',
+      use = ['aubio', 'FFTW3F', 'FFTW3', 'SNDFILE', 'JACK', 'LASH', 'SAMPLERATE', 'utilsio'],
+      source = str(source_file),
+      target = str(source_file).split('.')[0]
+    )
