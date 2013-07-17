@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 from numpy.testing import TestCase, run_module_suite
 from numpy.testing import assert_equal, assert_almost_equal
 from aubio import fvec, zero_crossing_rate, alpha_norm, min_removal
@@ -85,7 +87,7 @@ class aubio_fvec_test_case(TestCase):
 
     def test_zero_crossing_rate(self):
         a = array([0,1,-1], dtype='float32')
-        self.assertEquals (zero_crossing_rate(a), 1./3 )
+        assert_almost_equal (zero_crossing_rate(a), 1./3. )
         a = array([0.]*100, dtype='float32')
         self.assertEquals (zero_crossing_rate(a), 0 )
         a = array([-1.]*100, dtype='float32')

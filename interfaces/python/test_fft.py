@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 from numpy.testing import TestCase, run_module_suite
 from numpy.testing import assert_equal, assert_almost_equal
 # WARNING: numpy also has an fft object
@@ -87,7 +89,7 @@ class aubio_fft_test_case(TestCase):
     fftgrain = f ( timegrain )
     #self.plot_this ( fftgrain.phas )
     assert_equal ( fftgrain.phas[0], 0)
-    assert_equal ( fftgrain.phas[1], 0)
+    assert_equal ( abs(fftgrain.phas[1]), 0)
     assert_almost_equal (fftgrain.norm[0], impulse, decimal = 6 )
 
   def test_rdo_before_do(self):
