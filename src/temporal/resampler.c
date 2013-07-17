@@ -18,7 +18,7 @@
 
 */
 
-#include "config.h"
+//#include "config.h"
 
 #include "aubio_priv.h"
 #include "fvec.h"

@@ -24,7 +24,7 @@
 #include "fvec.h"
 #include "mathutils.h"
 #include "musicutils.h"
-#include "config.h"
+//#include "config.h"
 
 
 /** Window types */
