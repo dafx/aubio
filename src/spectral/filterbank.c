@@ -19,12 +19,12 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "fmat.h"
-#include "cvec.h"
-#include "spectral/filterbank.h"
-#include "mathutils.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../fmat.h"
+#include "../cvec.h"
+#include "../spectral/filterbank.h"
+#include "../mathutils.h"
 
 /** \brief A structure to store a set of n_filters filters of lenghts win_s */
 struct _aubio_filterbank_t

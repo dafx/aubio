@@ -19,13 +19,13 @@
 */
 
 
-#include "config.h"
+#include "../aubio_priv.h"
 
 #ifdef HAVE_SNDFILE
 
 #include <sndfile.h>
 
-#include "aubio_priv.h"
+
 #include "fvec.h"
 #include "fmat.h"
 #include "source_sndfile.h"

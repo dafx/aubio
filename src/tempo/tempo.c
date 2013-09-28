@@ -18,15 +18,15 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "cvec.h"
-#include "spectral/specdesc.h"
-#include "tempo/beattracking.h"
-#include "spectral/phasevoc.h"
-#include "onset/peakpicker.h"
-#include "mathutils.h"
-#include "tempo/tempo.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../cvec.h"
+#include "../spectral/specdesc.h"
+#include "../tempo/beattracking.h"
+#include "../spectral/phasevoc.h"
+#include "../onset/peakpicker.h"
+#include "../mathutils.h"
+#include "../tempo/tempo.h"
 
 /* structure to store object state */
 struct _aubio_tempo_t {

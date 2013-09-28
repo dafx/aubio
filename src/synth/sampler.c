@@ -18,13 +18,11 @@
 
 */
 
-
-#include "config.h"
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "fmat.h"
-#include "io/source.h"
-#include "synth/sampler.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../fmat.h"
+#include "../io/source.h"
+#include "../synth/sampler.h"
 
 struct _aubio_sampler_t {
   uint_t samplerate;

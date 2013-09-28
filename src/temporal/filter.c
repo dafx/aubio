@@ -22,11 +22,11 @@
 /* Requires lsmp_t to be long or double. float will NOT give reliable 
  * results */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "lvec.h"
-#include "mathutils.h"
-#include "temporal/filter.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../lvec.h"
+#include "../mathutils.h"
+#include "../temporal/filter.h"
 
 struct _aubio_filter_t
 {

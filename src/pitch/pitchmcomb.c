@@ -18,11 +18,11 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "cvec.h"
-#include "mathutils.h"
-#include "pitch/pitchmcomb.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../cvec.h"
+#include "../mathutils.h"
+#include "../pitch/pitchmcomb.h"
 
 #define CAND_SWAP(a,b) { register aubio_spectralcandidate_t *t=(a);(a)=(b);(b)=t; }
 

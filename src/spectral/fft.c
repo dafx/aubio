@@ -18,11 +18,11 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "cvec.h"
-#include "mathutils.h"
-#include "spectral/fft.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../cvec.h"
+#include "../mathutils.h"
+#include "../spectral/fft.h"
 
 #ifdef HAVE_FFTW3             // using FFTW3
 /* note that <complex.h> is not included here but only in aubio_priv.h, so that

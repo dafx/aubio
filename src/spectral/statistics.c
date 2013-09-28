@@ -18,9 +18,9 @@
 
 */
 
-#include "aubio_priv.h"
-#include "cvec.h"
-#include "spectral/specdesc.h"
+#include "../aubio_priv.h"
+#include "../cvec.h"
+#include "../spectral/specdesc.h"
 
 smpl_t
 cvec_sum (cvec_t * s)

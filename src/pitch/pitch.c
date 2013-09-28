@@ -18,22 +18,22 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "cvec.h"
-#include "lvec.h"
-#include "mathutils.h"
-#include "musicutils.h"
-#include "spectral/phasevoc.h"
-#include "temporal/filter.h"
-#include "temporal/c_weighting.h"
-#include "pitch/pitchmcomb.h"
-#include "pitch/pitchyin.h"
-#include "pitch/pitchfcomb.h"
-#include "pitch/pitchschmitt.h"
-#include "pitch/pitchyinfft.h"
-#include "pitch/pitchspecacf.h"
-#include "pitch/pitch.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../cvec.h"
+#include "../lvec.h"
+#include "../mathutils.h"
+#include "../musicutils.h"
+#include "../spectral/phasevoc.h"
+#include "../temporal/filter.h"
+#include "../temporal/c_weighting.h"
+#include "../pitch/pitchmcomb.h"
+#include "../pitch/pitchyin.h"
+#include "../pitch/pitchfcomb.h"
+#include "../pitch/pitchschmitt.h"
+#include "../pitch/pitchyinfft.h"
+#include "../pitch/pitchspecacf.h"
+#include "../pitch/pitch.h"
 
 #define DEFAULT_PITCH_SILENCE -50.
 

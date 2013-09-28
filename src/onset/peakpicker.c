@@ -18,13 +18,13 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "mathutils.h"
-#include "lvec.h"
-#include "temporal/filter.h"
-#include "temporal/biquad.h"
-#include "onset/peakpicker.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../mathutils.h"
+#include "../lvec.h"
+#include "../temporal/filter.h"
+#include "../temporal/biquad.h"
+#include "../onset/peakpicker.h"
 
 /** function pointer to thresholding function */
 typedef smpl_t (*aubio_thresholdfn_t)(fvec_t *input);
