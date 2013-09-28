@@ -18,12 +18,12 @@
 
 */
 
-#include "aubio_priv.h"
-#include "types.h"
-#include "fvec.h"
-#include "lvec.h"
-#include "temporal/filter.h"
-#include "temporal/a_weighting.h"
+#include "../aubio_priv.h"
+#include "../types.h"
+#include "../fvec.h"
+#include "../lvec.h"
+#include "../temporal/filter.h"
+#include "../temporal/a_weighting.h"
 
 uint_t
 aubio_filter_set_a_weighting (aubio_filter_t * f, uint_t samplerate)

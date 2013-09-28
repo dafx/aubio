@@ -18,15 +18,14 @@
 
 */
 
-#include "config.h"
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "io/sink.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../io/sink.h"
 #ifdef __APPLE__
-#include "io/sink_apple_audio.h"
+#include "../io/sink_apple_audio.h"
 #endif /* __APPLE__ */
 #ifdef HAVE_SNDFILE
-#include "io/sink_sndfile.h"
+#include "../io/sink_sndfile.h"
 #endif
 
 struct _aubio_sink_t { 

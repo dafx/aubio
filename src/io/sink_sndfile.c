@@ -19,15 +19,15 @@
 */
 
 
-#include "config.h"
+#include "../config.h"
 
 #ifdef HAVE_SNDFILE
 
 #include <sndfile.h>
 
-#include "aubio_priv.h"
-#include "sink_sndfile.h"
-#include "fvec.h"
+#include "../aubio_priv.h"
+#include "../sink_sndfile.h"
+#include "../fvec.h"
 
 #define MAX_CHANNELS 6
 #define MAX_SIZE 4096

@@ -33,7 +33,7 @@
  *
  */
 
-#if 1 //HAVE_CONFIG_H
+#if AUBIO_HAVE_CONFIG_H
 #include "config.h"
 #endif
 

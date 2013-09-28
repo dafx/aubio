@@ -18,11 +18,11 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "utils/scale.h"
-#include "mathutils.h" //fvec_min fvec_max
-#include "utils/hist.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../utils/scale.h"
+#include "../mathutils.h" //fvec_min fvec_max
+#include "../utils/hist.h"
 
 /********
  * Object Structure

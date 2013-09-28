@@ -19,12 +19,12 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fmat.h"
-#include "fvec.h"
-#include "cvec.h"
-#include "spectral/filterbank.h"
-#include "mathutils.h"
+#include "../aubio_priv.h"
+#include "../fmat.h"
+#include "../fvec.h"
+#include "../cvec.h"
+#include "../spectral/filterbank.h"
+#include "../mathutils.h"
 
 uint_t
 aubio_filterbank_set_triangle_bands (aubio_filterbank_t * fb,

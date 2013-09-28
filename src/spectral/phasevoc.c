@@ -18,12 +18,12 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "cvec.h"
-#include "mathutils.h"
-#include "spectral/fft.h"
-#include "spectral/phasevoc.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../cvec.h"
+#include "../mathutils.h"
+#include "../spectral/fft.h"
+#include "../spectral/phasevoc.h"
 
 /** phasevocoder internal object */
 struct _aubio_pvoc_t {

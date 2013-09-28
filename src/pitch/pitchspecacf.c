@@ -18,12 +18,12 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "cvec.h"
-#include "mathutils.h"
-#include "spectral/fft.h"
-#include "pitch/pitchspecacf.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../cvec.h"
+#include "../mathutils.h"
+#include "../spectral/fft.h"
+#include "../pitch/pitchspecacf.h"
 
 /** pitch specacf structure */
 struct _aubio_pitchspecacf_t

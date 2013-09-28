@@ -18,10 +18,10 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "mathutils.h"
-#include "tempo/beattracking.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../mathutils.h"
+#include "../tempo/beattracking.h"
 
 /** define to 1 to print out tracking difficulties */
 #define AUBIO_BEAT_WARNINGS 0

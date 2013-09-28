@@ -18,13 +18,13 @@
 
 */
 
-#include "config.h"
+#include "../config.h"
 
 #ifdef __APPLE__
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "io/sink_apple_audio.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../io/sink_apple_audio.h"
 
 // CFURLRef, CFURLCreateWithFileSystemPath, ...
 #include <CoreFoundation/CoreFoundation.h>

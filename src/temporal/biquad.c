@@ -18,10 +18,10 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "lvec.h"
-#include "temporal/filter.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../lvec.h"
+#include "../temporal/filter.h"
 
 uint_t
 aubio_filter_set_biquad (aubio_filter_t * f, lsmp_t b0, lsmp_t b1, lsmp_t b2,

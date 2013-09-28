@@ -19,9 +19,9 @@
 
 */
 
-#include "aubio_priv.h"
-#include "fvec.h"
-#include "pitch/pitchschmitt.h"
+#include "../aubio_priv.h"
+#include "../fvec.h"
+#include "../pitch/pitchschmitt.h"
 
 smpl_t aubio_schmittS16LE (aubio_pitchschmitt_t * p, uint_t nframes,
     signed short int *indata);
