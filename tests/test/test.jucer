@@ -159,10 +159,10 @@
                 file="../src/spectral/test-filterbank.c"/>
           <FILE id="fBY6KE" name="test-filterbank_mel.c" compile="0" resource="0"
                 file="../src/spectral/test-filterbank_mel.c"/>
-          <FILE id="Opc6RG" name="test-mfcc.c" compile="1" resource="0" file="../src/spectral/test-mfcc.c"/>
+          <FILE id="Opc6RG" name="test-mfcc.c" compile="0" resource="0" file="../src/spectral/test-mfcc.c"/>
           <FILE id="dCYDQb" name="test-phasevoc-jack.c" compile="0" resource="0"
                 file="../src/spectral/test-phasevoc-jack.c"/>
-          <FILE id="DcS0qy" name="test-phasevoc.c" compile="0" resource="0" file="../src/spectral/test-phasevoc.c"/>
+          <FILE id="DcS0qy" name="test-phasevoc.c" compile="1" resource="0" file="../src/spectral/test-phasevoc.c"/>
           <FILE id="ZP95tU" name="test-specdesc.c" compile="0" resource="0" file="../src/spectral/test-specdesc.c"/>
           <FILE id="deZA61" name="test-tss.c" compile="0" resource="0" file="../src/spectral/test-tss.c"/>
         </GROUP>
