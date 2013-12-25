@@ -23,7 +23,7 @@
 #include "aubio_priv.h"
 #include "fvec.h"
 #include "fmat.h"
-#include "io/source_apple_audio.h"
+#include "source_apple_audio.h"
 
 // ExtAudioFileRef, AudioStreamBasicDescription, AudioBufferList, ...
 #include <AudioToolbox/AudioToolbox.h>
