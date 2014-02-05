@@ -24,7 +24,7 @@
 
 #include "../aubio_priv.h"
 #include "../fvec.h"
-#include "../io/sink_apple_audio.h"
+#include "sink_apple_audio.h"
 
 // CFURLRef, CFURLCreateWithFileSystemPath, ...
 #include <CoreFoundation/CoreFoundation.h>

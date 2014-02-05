@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="joPTWd" name="test" projectType="consoleapp" version="1.0.0"
+              bundleIdentifier="com.yourcompany.test" includeBinaryInAppConfig="1"
+              jucerVersion="3.1.0">
+  <MAINGROUP id="LpTLcP" name="test">
+    <GROUP id="{F09F6149-8EF3-EAC9-9664-244916CD3C6D}" name="Source">
+      <GROUP id="{8013070B-12A6-267B-AC84-A70B48687BE0}" name="src">
+        <FILE id="PZ3Hls" name="aubio.h" compile="0" resource="0" file="../../src/aubio.h"/>
+        <FILE id="pZhSw4" name="aubio_priv.h" compile="0" resource="0" file="../../src/aubio_priv.h"/>
+        <FILE id="GnCbDb" name="config.h" compile="0" resource="0" file="../../src/config.h"/>
+        <FILE id="loxY4x" name="cvec.c" compile="1" resource="0" file="../../src/cvec.c"/>
+        <FILE id="giL9dP" name="cvec.h" compile="0" resource="0" file="../../src/cvec.h"/>
+        <FILE id="pOrj2z" name="fmat.c" compile="1" resource="0" file="../../src/fmat.c"/>
+        <FILE id="p0DLm3" name="fmat.h" compile="0" resource="0" file="../../src/fmat.h"/>
+        <FILE id="SR4HP2" name="fvec.c" compile="1" resource="0" file="../../src/fvec.c"/>
+        <FILE id="ApHn3y" name="fvec.h" compile="0" resource="0" file="../../src/fvec.h"/>
+        <GROUP id="{75ACB3B8-229A-D4F1-CFDE-267CF2169DC0}" name="io">
+          <FILE id="BsuNHP" name="sink.c" compile="1" resource="0" file="../../src/io/sink.c"/>
+          <FILE id="rgzLkN" name="sink.h" compile="0" resource="0" file="../../src/io/sink.h"/>
+          <FILE id="O1k4Xg" name="sink_apple_audio.c" compile="1" resource="0"
+                file="../../src/io/sink_apple_audio.c"/>
+          <FILE id="TOl0Ax" name="sink_apple_audio.h" compile="0" resource="0"
+                file="../../src/io/sink_apple_audio.h"/>
+          <FILE id="ONCm9a" name="sink_sndfile.c" compile="1" resource="0" file="../../src/io/sink_sndfile.c"/>
+          <FILE id="Pr08vY" name="sink_sndfile.h" compile="0" resource="0" file="../../src/io/sink_sndfile.h"/>
+          <FILE id="JbeYxN" name="sndfileio.c" compile="1" resource="0" file="../../src/io/sndfileio.c"/>
+          <FILE id="wO9PMY" name="sndfileio.h" compile="0" resource="0" file="../../src/io/sndfileio.h"/>
+          <FILE id="jJ1rpb" name="source.c" compile="1" resource="0" file="../../src/io/source.c"/>
+          <FILE id="Dm11p0" name="source.h" compile="0" resource="0" file="../../src/io/source.h"/>
+          <FILE id="utDoTy" name="source_apple_audio.c" compile="1" resource="0"
+                file="../../src/io/source_apple_audio.c"/>
+          <FILE id="oMLzAG" name="source_apple_audio.h" compile="0" resource="0"
+                file="../../src/io/source_apple_audio.h"/>
+          <FILE id="qrKX4n" name="source_sndfile.c" compile="1" resource="0"
+                file="../../src/io/source_sndfile.c"/>
+          <FILE id="wGnui3" name="source_sndfile.h" compile="0" resource="0"
+                file="../../src/io/source_sndfile.h"/>
+          <FILE id="DXTVaH" name="utils_apple_audio.c" compile="1" resource="0"
+                file="../../src/io/utils_apple_audio.c"/>
+        </GROUP>
+        <FILE id="N9R2Gp" name="lvec.c" compile="1" resource="0" file="../../src/lvec.c"/>
+        <FILE id="RoSbhK" name="lvec.h" compile="0" resource="0" file="../../src/lvec.h"/>
+        <FILE id="rAVrF8" name="mathutils.c" compile="1" resource="0" file="../../src/mathutils.c"/>
+        <FILE id="ZjUIZj" name="mathutils.h" compile="0" resource="0" file="../../src/mathutils.h"/>
+        <FILE id="WLb6Nn" name="musicutils.h" compile="0" resource="0" file="../../src/musicutils.h"/>
+        <GROUP id="{B681E3CC-4668-9CDE-4FFC-588DF5E3A572}" name="onset">
+          <FILE id="rueYRk" name="onset.c" compile="1" resource="0" file="../../src/onset/onset.c"/>
+          <FILE id="mFIxS4" name="onset.h" compile="0" resource="0" file="../../src/onset/onset.h"/>
+          <FILE id="EaK39z" name="peakpicker.c" compile="1" resource="0" file="../../src/onset/peakpicker.c"/>
+          <FILE id="CYuO0S" name="peakpicker.h" compile="0" resource="0" file="../../src/onset/peakpicker.h"/>
+        </GROUP>
+        <GROUP id="{7BA2DD51-2617-5C48-6D66-5A73B706342E}" name="pitch">
+          <FILE id="sUqzwM" name="pitch.c" compile="1" resource="0" file="../../src/pitch/pitch.c"/>
+          <FILE id="sBPJNr" name="pitch.h" compile="0" resource="0" file="../../src/pitch/pitch.h"/>
+          <FILE id="TLWFmp" name="pitchfcomb.c" compile="1" resource="0" file="../../src/pitch/pitchfcomb.c"/>
+          <FILE id="nNkCGJ" name="pitchfcomb.h" compile="0" resource="0" file="../../src/pitch/pitchfcomb.h"/>
+          <FILE id="xrrInv" name="pitchmcomb.c" compile="1" resource="0" file="../../src/pitch/pitchmcomb.c"/>
+          <FILE id="RF0Uvp" name="pitchmcomb.h" compile="0" resource="0" file="../../src/pitch/pitchmcomb.h"/>
+          <FILE id="ajyp9M" name="pitchschmitt.c" compile="1" resource="0" file="../../src/pitch/pitchschmitt.c"/>
+          <FILE id="xbtA0I" name="pitchschmitt.h" compile="0" resource="0" file="../../src/pitch/pitchschmitt.h"/>
+          <FILE id="bR9ohg" name="pitchspecacf.c" compile="1" resource="0" file="../../src/pitch/pitchspecacf.c"/>
+          <FILE id="CZh78s" name="pitchspecacf.h" compile="0" resource="0" file="../../src/pitch/pitchspecacf.h"/>
+          <FILE id="txVALL" name="pitchyin.c" compile="1" resource="0" file="../../src/pitch/pitchyin.c"/>
+          <FILE id="qAfr1v" name="pitchyin.h" compile="0" resource="0" file="../../src/pitch/pitchyin.h"/>
+          <FILE id="KtlzV7" name="pitchyinfft.c" compile="1" resource="0" file="../../src/pitch/pitchyinfft.c"/>
+          <FILE id="DkUG5n" name="pitchyinfft.h" compile="0" resource="0" file="../../src/pitch/pitchyinfft.h"/>
+        </GROUP>
+        <GROUP id="{05C822BE-DA09-D1FA-4ABB-B2781E3BF933}" name="spectral">
+          <FILE id="HJxEnZ" name="fft.c" compile="1" resource="0" file="../../src/spectral/fft.c"/>
+          <FILE id="KzxG0L" name="fft.h" compile="0" resource="0" file="../../src/spectral/fft.h"/>
+          <FILE id="jTb3Rh" name="filterbank.c" compile="1" resource="0" file="../../src/spectral/filterbank.c"/>
+          <FILE id="mrwmj7" name="filterbank.h" compile="0" resource="0" file="../../src/spectral/filterbank.h"/>
+          <FILE id="ODXm4P" name="filterbank_mel.c" compile="1" resource="0"
+                file="../../src/spectral/filterbank_mel.c"/>
+          <FILE id="Mg3nR7" name="filterbank_mel.h" compile="0" resource="0"
+                file="../../src/spectral/filterbank_mel.h"/>
+          <FILE id="Wqqhwy" name="mfcc.c" compile="1" resource="0" file="../../src/spectral/mfcc.c"/>
+          <FILE id="o0fUlr" name="mfcc.h" compile="0" resource="0" file="../../src/spectral/mfcc.h"/>
+          <FILE id="dwypTf" name="ooura_fft8g.c" compile="1" resource="0" file="../../src/spectral/ooura_fft8g.c"/>
+          <FILE id="jvWbIZ" name="phasevoc.c" compile="1" resource="0" file="../../src/spectral/phasevoc.c"/>
+          <FILE id="uxrTqO" name="phasevoc.h" compile="0" resource="0" file="../../src/spectral/phasevoc.h"/>
+          <FILE id="yg5PY8" name="specdesc.c" compile="1" resource="0" file="../../src/spectral/specdesc.c"/>
+          <FILE id="GyeFnm" name="specdesc.h" compile="0" resource="0" file="../../src/spectral/specdesc.h"/>
+          <FILE id="LLzTd6" name="statistics.c" compile="1" resource="0" file="../../src/spectral/statistics.c"/>
+          <FILE id="wHyYYU" name="tss.c" compile="1" resource="0" file="../../src/spectral/tss.c"/>
+          <FILE id="ljWcOA" name="tss.h" compile="0" resource="0" file="../../src/spectral/tss.h"/>
+        </GROUP>
+        <GROUP id="{5EEFDA13-CE07-FDF3-3E93-7C4576109918}" name="synth">
+          <FILE id="z3WkdJ" name="sampler.c" compile="1" resource="0" file="../../src/synth/sampler.c"/>
+          <FILE id="mkcGLv" name="sampler.h" compile="0" resource="0" file="../../src/synth/sampler.h"/>
+        </GROUP>
+        <GROUP id="{03EE5720-4B15-5B5E-9B98-D45EA48B575B}" name="tempo">
+          <FILE id="vqBtcz" name="beattracking.c" compile="1" resource="0" file="../../src/tempo/beattracking.c"/>
+          <FILE id="z8cKYu" name="beattracking.h" compile="0" resource="0" file="../../src/tempo/beattracking.h"/>
+          <FILE id="hJKlwF" name="tempo.c" compile="1" resource="0" file="../../src/tempo/tempo.c"/>
+          <FILE id="YeZZyF" name="tempo.h" compile="0" resource="0" file="../../src/tempo/tempo.h"/>
+        </GROUP>
+        <GROUP id="{62623E17-7FBC-4C08-C038-7E246B555C38}" name="temporal">
+          <FILE id="re2HnZ" name="a_weighting.c" compile="1" resource="0" file="../../src/temporal/a_weighting.c"/>
+          <FILE id="Uma1s7" name="a_weighting.h" compile="0" resource="0" file="../../src/temporal/a_weighting.h"/>
+          <FILE id="KeLFmh" name="biquad.c" compile="1" resource="0" file="../../src/temporal/biquad.c"/>
+          <FILE id="G6EBjB" name="biquad.h" compile="0" resource="0" file="../../src/temporal/biquad.h"/>
+          <FILE id="RpOnxR" name="c_weighting.c" compile="1" resource="0" file="../../src/temporal/c_weighting.c"/>
+          <FILE id="Ff6Lf1" name="c_weighting.h" compile="0" resource="0" file="../../src/temporal/c_weighting.h"/>
+          <FILE id="kBykmX" name="filter.c" compile="1" resource="0" file="../../src/temporal/filter.c"/>
+          <FILE id="TW28hv" name="filter.h" compile="0" resource="0" file="../../src/temporal/filter.h"/>
+          <FILE id="FHrV1G" name="resampler.c" compile="1" resource="0" file="../../src/temporal/resampler.c"/>
+          <FILE id="PUksrj" name="resampler.h" compile="0" resource="0" file="../../src/temporal/resampler.h"/>
+        </GROUP>
+        <FILE id="Hhnhlu" name="types.h" compile="0" resource="0" file="../../src/types.h"/>
+        <GROUP id="{F2629EB1-49D0-AD13-353B-DA4ED6A78EFF}" name="utils">
+          <FILE id="CKaJVl" name="hist.c" compile="1" resource="0" file="../../src/utils/hist.c"/>
+          <FILE id="gNcEGt" name="hist.h" compile="0" resource="0" file="../../src/utils/hist.h"/>
+          <FILE id="rbHliD" name="scale.c" compile="1" resource="0" file="../../src/utils/scale.c"/>
+          <FILE id="yv0Zv4" name="scale.h" compile="0" resource="0" file="../../src/utils/scale.h"/>
+        </GROUP>
+        <FILE id="Fcpcw9" name="vecutils.c" compile="1" resource="0" file="../../src/vecutils.c"/>
+        <FILE id="zjWjc4" name="vecutils.h" compile="0" resource="0" file="../../src/vecutils.h"/>
+        <FILE id="iZLusc" name="wscript_build" compile="0" resource="1" file="../../src/wscript_build"/>
+      </GROUP>
+      <GROUP id="{69C87BCF-EE55-B9A2-4AD5-8CEAF5B36287}" name="test">
+        <GROUP id="{C2B08E10-2CA8-5438-514F-8F5CEBAE7778}" name="io">
+          <FILE id="V32xV4" name="test-sink.c" compile="0" resource="0" file="../src/io/test-sink.c"/>
+          <FILE id="UTzBuJ" name="test-sink_apple_audio.c" compile="0" resource="0"
+                file="../src/io/test-sink_apple_audio.c"/>
+          <FILE id="Q5xRzP" name="test-sink_sndfile.c" compile="0" resource="0"
+                file="../src/io/test-sink_sndfile.c"/>
+          <FILE id="Ama6Bt" name="test-source.c" compile="0" resource="0" file="../src/io/test-source.c"/>
+          <FILE id="pP8qto" name="test-source_apple_audio.c" compile="0" resource="0"
+                file="../src/io/test-source_apple_audio.c"/>
+          <FILE id="MMYSuk" name="test-source_multi.c" compile="0" resource="0"
+                file="../src/io/test-source_multi.c"/>
+          <FILE id="hofMAX" name="test-source_seek.c" compile="0" resource="0"
+                file="../src/io/test-source_seek.c"/>
+          <FILE id="czTUjU" name="test-source_sndfile.c" compile="0" resource="0"
+                file="../src/io/test-source_sndfile.c"/>
+        </GROUP>
+        <GROUP id="{5C271587-01DF-675B-04E8-F3BEBAEFAE6A}" name="onset">
+          <FILE id="GO2gOA" name="test-onset.c" compile="0" resource="0" file="../src/onset/test-onset.c"/>
+          <FILE id="Q7wGhP" name="test-peakpicker.c" compile="0" resource="0"
+                file="../src/onset/test-peakpicker.c"/>
+        </GROUP>
+        <GROUP id="{9E1E9DDE-6661-1ECC-94DE-E088F369B211}" name="pitch">
+          <FILE id="tiQ0dW" name="test-pitch.c" compile="0" resource="0" file="../src/pitch/test-pitch.c"/>
+          <FILE id="vveskw" name="test-pitchfcomb.c" compile="0" resource="0"
+                file="../src/pitch/test-pitchfcomb.c"/>
+          <FILE id="duvd48" name="test-pitchmcomb.c" compile="0" resource="0"
+                file="../src/pitch/test-pitchmcomb.c"/>
+          <FILE id="gtfrsd" name="test-pitchschmitt.c" compile="0" resource="0"
+                file="../src/pitch/test-pitchschmitt.c"/>
+          <FILE id="ezPeWu" name="test-pitchyin.c" compile="0" resource="0" file="../src/pitch/test-pitchyin.c"/>
+          <FILE id="ZA2EEG" name="test-pitchyinfft.c" compile="0" resource="0"
+                file="../src/pitch/test-pitchyinfft.c"/>
+        </GROUP>
+        <GROUP id="{D11A8026-3A6C-51CC-6C0C-95F5830FBCC9}" name="spectral">
+          <FILE id="gjogRC" name="test-fft.c" compile="0" resource="0" file="../src/spectral/test-fft.c"/>
+          <FILE id="P5o9by" name="test-filterbank.c" compile="0" resource="0"
+                file="../src/spectral/test-filterbank.c"/>
+          <FILE id="fBY6KE" name="test-filterbank_mel.c" compile="0" resource="0"
+                file="../src/spectral/test-filterbank_mel.c"/>
+          <FILE id="Opc6RG" name="test-mfcc.c" compile="0" resource="0" file="../src/spectral/test-mfcc.c"/>
+          <FILE id="dCYDQb" name="test-phasevoc-jack.c" compile="0" resource="0"
+                file="../src/spectral/test-phasevoc-jack.c"/>
+          <FILE id="DcS0qy" name="test-phasevoc.c" compile="1" resource="0" file="../src/spectral/test-phasevoc.c"/>
+          <FILE id="ZP95tU" name="test-specdesc.c" compile="0" resource="0" file="../src/spectral/test-specdesc.c"/>
+          <FILE id="deZA61" name="test-tss.c" compile="0" resource="0" file="../src/spectral/test-tss.c"/>
+        </GROUP>
+        <GROUP id="{1BDDE525-1846-295A-925F-DD05CCF12C0D}" name="synth">
+          <FILE id="xRnEqB" name="test-sampler.c" compile="0" resource="0" file="../src/synth/test-sampler.c"/>
+        </GROUP>
+        <GROUP id="{506AC706-3EF8-71CB-BD3E-27B7362FA1B8}" name="tempo">
+          <FILE id="Ghat3n" name="test-beattracking.c" compile="0" resource="0"
+                file="../src/tempo/test-beattracking.c"/>
+          <FILE id="jkY1yv" name="test-tempo.c" compile="0" resource="0" file="../src/tempo/test-tempo.c"/>
+        </GROUP>
+        <GROUP id="{991EBA71-05F6-3A9D-42C7-621DCE69E718}" name="temporal">
+          <FILE id="TVJzFV" name="test-a_weighting.c" compile="0" resource="0"
+                file="../src/temporal/test-a_weighting.c"/>
+          <FILE id="TDpnbL" name="test-biquad.c" compile="0" resource="0" file="../src/temporal/test-biquad.c"/>
+          <FILE id="sDkWll" name="test-c_weighting.c" compile="0" resource="0"
+                file="../src/temporal/test-c_weighting.c"/>
+          <FILE id="WYKTKl" name="test-filter.c" compile="0" resource="0" file="../src/temporal/test-filter.c"/>
+          <FILE id="m4JB1o" name="test-resampler.c" compile="0" resource="0"
+                file="../src/temporal/test-resampler.c"/>
+        </GROUP>
+        <FILE id="z3G2Vk" name="test-cvec.c" compile="0" resource="0" file="../src/test-cvec.c"/>
+        <FILE id="WBUuQz" name="test-delnull.c" compile="0" resource="0" file="../src/test-delnull.c"/>
+        <FILE id="uYEII8" name="test-fmat.c" compile="0" resource="0" file="../src/test-fmat.c"/>
+        <FILE id="c9KG4y" name="test-fvec.c" compile="0" resource="0" file="../src/test-fvec.c"/>
+        <FILE id="ZI0U5e" name="test-lvec.c" compile="0" resource="0" file="../src/test-lvec.c"/>
+        <FILE id="E465lK" name="test-mathutils-window.c" compile="0" resource="0"
+              file="../src/test-mathutils-window.c"/>
+        <FILE id="VdoHds" name="test-mathutils.c" compile="0" resource="0"
+              file="../src/test-mathutils.c"/>
+        <GROUP id="{7034E0DA-BF79-7671-1B66-C1D26960CFF2}" name="utils">
+          <FILE id="VPi7ia" name="test-hist.c" compile="0" resource="0" file="../src/utils/test-hist.c"/>
+          <FILE id="WjBU1T" name="test-scale.c" compile="0" resource="0" file="../src/utils/test-scale.c"/>
+        </GROUP>
+      </GROUP>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" extraDefs="AUBIO_HAVE_CONFIG_H">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       isDebug="1" optimisation="1" targetName="test" headerPath="../../../../src"/>
+        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
+                       isDebug="0" optimisation="2" targetName="test"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_video" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../juce/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULES id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_core" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_events" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_opengl" showAllCode="1" useLocalCopy="0"/>
+    <MODULES id="juce_video" showAllCode="1" useLocalCopy="0"/>
+  </MODULES>
+  <JUCEOPTIONS/>
+</JUCERPROJECT>
