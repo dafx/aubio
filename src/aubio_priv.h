@@ -131,7 +131,7 @@ typedef enum {
 #define AUBIO_SPRINTF                sprintf
 
 /* Libc shortcuts */
-#define PI         (M_PI)
+#define PI         (3.141592654f)
 #define TWO_PI     (PI*2.)
 
 /* aliases to math.h functions */
