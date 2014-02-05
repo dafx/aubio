@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2009 Paul Brossier <piem@aubio.org>
+  Copyright (C) 2003-2013 Paul Brossier <piem@aubio.org>
 
   This file is part of aubio.
 
@@ -22,10 +22,10 @@
  
   Pitch detection using a spectral implementation of the YIN algorithm
   
-  This algorithm was derived from the YIN algorithm (see pitchyin.c). In this
-  implementation, a Fourier transform is used to compute a tapered square
-  difference function, which allows spectral weighting. Because the difference
-  function is tapered, the selection of the period is simplified.
+  This algorithm was derived from the YIN algorithm. In this implementation, a
+  Fourier transform is used to compute a tapered square difference function,
+  which allows spectral weighting. Because the difference function is tapered,
+  the selection of the period is simplified.
  
   Paul Brossier, [Automatic annotation of musical audio for interactive
   systems](http://aubio.org/phd/), Chapter 3, Pitch Analysis, PhD thesis,
@@ -35,8 +35,8 @@
 
 */
 
-#ifndef PITCHYINFFT_H
-#define PITCHYINFFT_H
+#ifndef _AUBIO_PITCHYINFFT_H
+#define _AUBIO_PITCHYINFFT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,6 +55,7 @@ typedef struct _aubio_pitchyinfft_t aubio_pitchyinfft_t;
 void aubio_pitchyinfft_do (aubio_pitchyinfft_t * o, fvec_t * samples_in, fvec_t * cands_out);
 /** creation of the pitch detection object
  
+  \param samplerate samplerate of the input signal
   \param buf_size size of the input buffer to analyse 
  
 */
@@ -95,4 +96,4 @@ smpl_t aubio_pitchyinfft_get_confidence (aubio_pitchyinfft_t * o);
 }
 #endif
 
-#endif /*PITCHYINFFT_H*/ 
+#endif /* _AUBIO_PITCHYINFFT_H */

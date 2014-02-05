@@ -102,6 +102,7 @@ defaultsizes = {
     'peakpicker':   ['1'],
     'source':       ['self->hop_size', '1'],
     'sampler':      ['self->hop_size'],
+    'wavetable':    ['self->hop_size'],
 }
 
 # default value for variables
@@ -238,9 +239,9 @@ Py_%(name)s_new (PyTypeObject * pytype, PyObject * args, PyObject * kwds)
             s += """\
 
   self->%(pname)s = %(defval)s;
-  if (%(pname)s > 0) {
+  if ((sint_t)%(pname)s > 0) {
     self->%(pname)s = %(pname)s;
-  } else if (%(pname)s < 0) {
+  } else if ((sint_t)%(pname)s < 0) {
     PyErr_SetString (PyExc_ValueError,
         "can not use negative value for %(pname)s");
     return NULL;

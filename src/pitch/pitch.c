@@ -232,8 +232,15 @@ aubio_pitch_slideblock (aubio_pitch_t * p, fvec_t * ibuf)
 uint_t
 aubio_pitch_set_unit (aubio_pitch_t * p, char_t * pitch_unit)
 {
+  uint_t err = AUBIO_OK;
   aubio_pitch_mode pitch_mode;
   if (strcmp (pitch_unit, "freq") == 0)
+    pitch_mode = aubio_pitchm_freq;
+  else if (strcmp (pitch_unit, "hertz") == 0)
+    pitch_mode = aubio_pitchm_freq;
+  else if (strcmp (pitch_unit, "Hz") == 0)
+    pitch_mode = aubio_pitchm_freq;
+  else if (strcmp (pitch_unit, "f0") == 0)
     pitch_mode = aubio_pitchm_freq;
   else if (strcmp (pitch_unit, "midi") == 0)
     pitch_mode = aubio_pitchm_midi;
@@ -246,6 +253,7 @@ aubio_pitch_set_unit (aubio_pitch_t * p, char_t * pitch_unit)
   else {
     AUBIO_ERR ("unknown pitch detection unit %s, using default\n", pitch_unit);
     pitch_mode = aubio_pitchm_default;
+    err = AUBIO_FAIL;
   }
   p->mode = pitch_mode;
   switch (p->mode) {
@@ -265,7 +273,7 @@ aubio_pitch_set_unit (aubio_pitch_t * p, char_t * pitch_unit)
     default:
       break;
   }
-  return AUBIO_OK;
+  return err;
 }
 
 uint_t

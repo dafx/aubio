@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2009 Matthew Davies and Paul Brossier <piem@aubio.org>
+  Copyright (C) 2003-2013 Matthew Davies and Paul Brossier <piem@aubio.org>
 
   This file is part of aubio.
 
@@ -36,8 +36,8 @@
   \example tempo/test-beattracking.c
   
 */
-#ifndef BEATTRACKING_H
-#define BEATTRACKING_H
+#ifndef _AUBIO_BEATTRACKING_H
+#define _AUBIO_BEATTRACKING_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,10 +48,13 @@ typedef struct _aubio_beattracking_t aubio_beattracking_t;
 
 /** create beat tracking object
 
+  \param winlen length of the onset detection window
   \param hop_size number of onset detection samples [512] 
+  \param samplerate samplerate of the input signal
 
 */
-aubio_beattracking_t * new_aubio_beattracking(uint_t hop_size);
+aubio_beattracking_t * new_aubio_beattracking(uint_t winlen, uint_t hop_size,
+    uint_t samplerate);
 
 /** track the beat 
 
@@ -95,4 +98,4 @@ void del_aubio_beattracking(aubio_beattracking_t * p);
 }
 #endif
 
-#endif /* BEATTRACKING_H */
+#endif /* _AUBIO_BEATTRACKING_H */

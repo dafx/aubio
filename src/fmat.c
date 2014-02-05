@@ -21,7 +21,10 @@
 #include "aubio_priv.h"
 #include "fmat.h"
 
-fmat_t * new_fmat (uint_t length, uint_t height) {
+fmat_t * new_fmat (uint_t height, uint_t length) {
+  if ((sint_t)length <= 0 || (sint_t)height <= 0 ) {
+    return NULL;
+  }
   fmat_t * s = AUBIO_NEW(fmat_t);
   uint_t i,j;
   s->height = height;
@@ -45,16 +48,21 @@ void del_fmat (fmat_t *s) {
   AUBIO_FREE(s);
 }
 
-void fmat_write_sample(fmat_t *s, smpl_t data, uint_t channel, uint_t position) {
+void fmat_set_sample(fmat_t *s, smpl_t data, uint_t channel, uint_t position) {
   s->data[channel][position] = data;
 }
-smpl_t fmat_read_sample(fmat_t *s, uint_t channel, uint_t position) {
+
+smpl_t fmat_get_sample(fmat_t *s, uint_t channel, uint_t position) {
   return s->data[channel][position];
 }
-void fmat_put_channel(fmat_t *s, smpl_t * data, uint_t channel) {
-  s->data[channel] = data;
+
+void fmat_get_channel(fmat_t *s, uint_t channel, fvec_t *output) {
+  output->data = s->data[channel];
+  output->length = s->length;
+  return;
 }
-smpl_t * fmat_get_channel(fmat_t *s, uint_t channel) {
+
+smpl_t * fmat_get_channel_data(fmat_t *s, uint_t channel) {
   return s->data[channel];
 }
 
@@ -84,7 +92,14 @@ void fmat_set(fmat_t *s, smpl_t val) {
 }
 
 void fmat_zeros(fmat_t *s) {
+#if HAVE_MEMCPY_HACKS
+  uint_t i;
+  for (i=0; i< s->height; i++) {
+    memset(s->data[i], 0, s->length * sizeof(smpl_t));
+  }
+#else
   fmat_set(s, 0.);
+#endif
 }
 
 void fmat_ones(fmat_t *s) {
@@ -111,21 +126,28 @@ void fmat_weight(fmat_t *s, fmat_t *weight) {
 }
 
 void fmat_copy(fmat_t *s, fmat_t *t) {
-  uint_t i,j;
-  uint_t height = MIN(s->height, t->height);
-  uint_t length = MIN(s->length, t->length);
   if (s->height != t->height) {
-    AUBIO_ERR("warning, trying to copy %d rows to %d rows \n", 
+    AUBIO_ERR("trying to copy %d rows to %d rows \n",
             s->height, t->height);
+    return;
   }
   if (s->length != t->length) {
-    AUBIO_ERR("warning, trying to copy %d columns to %d columns\n", 
+    AUBIO_ERR("trying to copy %d columns to %d columns\n",
             s->length, t->length);
+    return;
   }
-  for (i=0; i< height; i++) {
-    for (j=0; j< length; j++) {
+#if HAVE_MEMCPY_HACKS
+  uint_t i;
+  for (i=0; i< s->height; i++) {
+    memcpy(t->data[i], s->data[i], t->length * sizeof(smpl_t));
+  }
+#else
+  uint_t i,j;
+  for (i=0; i< t->height; i++) {
+    for (j=0; j< t->length; j++) {
       t->data[i][j] = s->data[i][j];
     }
   }
+#endif
 }
 

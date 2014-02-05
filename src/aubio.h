@@ -109,7 +109,7 @@
   \endcode
 
   Several examples of C programs are available in the \p examples/ and \p tests/src
-  directory of the source tree.
+  directories of the source tree.
 
   \subsection unstable_api Unstable API
 
@@ -185,20 +185,24 @@ extern "C"
 #include "io/source.h"
 #include "io/sink.h"
 #include "synth/sampler.h"
+#include "synth/wavetable.h"
+#include "utils/parameter.h"
 
 #if AUBIO_UNSTABLE
 #include "mathutils.h"
 #include "io/source_sndfile.h"
 #include "io/source_apple_audio.h"
+#include "io/source_avcodec.h"
 #include "io/sink_sndfile.h"
 #include "io/sink_apple_audio.h"
-#include "io/sndfileio.h"
+#include "io/audio_unit.h"
 #include "onset/peakpicker.h"
 #include "pitch/pitchmcomb.h"
 #include "pitch/pitchyin.h"
 #include "pitch/pitchyinfft.h"
 #include "pitch/pitchschmitt.h"
 #include "pitch/pitchfcomb.h"
+#include "pitch/pitchspecacf.h"
 #include "tempo/beattracking.h"
 #include "utils/scale.h"
 #include "utils/hist.h"

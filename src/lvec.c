@@ -22,13 +22,12 @@
 #include "lvec.h"
 
 lvec_t * new_lvec( uint_t length) {
+  if ((sint_t)length <= 0) {
+    return NULL;
+  }
   lvec_t * s = AUBIO_NEW(lvec_t);
-  uint_t j;
   s->length = length;
   s->data = AUBIO_ARRAY(lsmp_t, s->length);
-  for (j=0; j< s->length; j++) {
-    s->data[j]=0.;
-  }
   return s;
 }
 
@@ -40,7 +39,7 @@ void del_lvec(lvec_t *s) {
 void lvec_write_sample(lvec_t *s, lsmp_t data, uint_t position) {
   s->data[position] = data;
 }
-lsmp_t lvec_read_sample(lvec_t *s, uint_t position) {
+lsmp_t lvec_get_sample(lvec_t *s, uint_t position) {
   return s->data[position];
 }
 
@@ -58,7 +57,7 @@ void lvec_print(lvec_t *s) {
   AUBIO_MSG("\n");
 }
 
-void lvec_set(lvec_t *s, smpl_t val) {
+void lvec_set_all (lvec_t *s, smpl_t val) {
   uint_t j;
   for (j=0; j< s->length; j++) {
     s->data[j] = val;
@@ -66,10 +65,14 @@ void lvec_set(lvec_t *s, smpl_t val) {
 }
 
 void lvec_zeros(lvec_t *s) {
-  lvec_set(s, 0.);
+#if HAVE_MEMCPY_HACKS
+  memset(s->data, 0, s->length * sizeof(lsmp_t));
+#else
+  lvec_set_all (s, 0.);
+#endif
 }
 
 void lvec_ones(lvec_t *s) {
-  lvec_set(s, 1.);
+  lvec_set_all (s, 1.);
 }
 

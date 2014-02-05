@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2009 Paul Brossier <piem@aubio.org>
+  Copyright (C) 2003-2013 Paul Brossier <piem@aubio.org>
 
   This file is part of aubio.
 
@@ -27,8 +27,8 @@
 
  */
 
-#ifndef MATHUTILS_H
-#define MATHUTILS_H
+#ifndef _AUBIO_MATHUTILS_H
+#define _AUBIO_MATHUTILS_H
 
 #include "fvec.h"
 #include "musicutils.h"
@@ -107,18 +107,6 @@ void fvec_shift (fvec_t * v);
 
 */
 smpl_t fvec_sum (fvec_t * v);
-
-/** compute the energy of a vector
-
-  This function compute the sum of the squared elements of a vector, normalised
-  by its length.
- 
-  \param v vector to get the energy from 
-
-  \return the energy of v
- 
-*/
-smpl_t fvec_local_energy (fvec_t * v);
 
 /** compute the High Frequency Content of a vector
 
@@ -231,9 +219,6 @@ and in the Public Domain.
 */
 smpl_t fvec_median (fvec_t * v);
 
-/** finds exact peak index by quadratic interpolation*/
-smpl_t fvec_quadint (fvec_t * x, uint_t pos);
-
 /** finds exact peak index by quadratic interpolation
 
   See [Quadratic Interpolation of Spectral
@@ -297,5 +282,4 @@ void aubio_autocorr (fvec_t * input, fvec_t * output);
 }
 #endif
 
-#endif
-
+#endif /* _AUBIO_MATHUTILS_H */

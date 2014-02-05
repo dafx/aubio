@@ -8,23 +8,23 @@ import sys
 #from aubio.task import *
 
 usage = "usage: %s [options] -i soundfile" % sys.argv[0]
-usage += "\nhelp: %s -h" % sys.argv[0]
+usage += "\n help: %s -h" % sys.argv[0]
 
 def parse_args():
     from optparse import OptionParser
     parser = OptionParser(usage=usage)
     parser.add_option("-i", "--input", action = "store", dest = "source_file",
             help="input sound file to analyse", metavar = "<source_file>")
-    parser.add_option("-m","--method",
+    parser.add_option("-O","--onset-method",
             action="store", dest="onset_method", default='default',
             metavar = "<onset_method>",
             help="onset detection method [default=default] \
                     complexdomain|hfc|phase|specdiff|energy|kl|mkl")
     # cutting methods
-    """
     parser.add_option("-b","--beat",
             action="store_true", dest="beat", default=False,
             help="use beat locations")
+    """
     parser.add_option("-S","--silencecut",
             action="store_true", dest="silencecut", default=False,
             help="use silence locations")
@@ -34,19 +34,19 @@ def parse_args():
             help="silence threshold [default=-70]")
             """
     # algorithm parameters
-    parser.add_option("--samplerate",
+    parser.add_option("-r", "--samplerate",
             metavar = "<freq>", type='int',
             action="store", dest="samplerate", default=0,
             help="samplerate at which the file should be represented")
     parser.add_option("-B","--bufsize",
             action="store", dest="bufsize", default=512,
-            metavar = "<size>",
+            metavar = "<size>", type='int',
             help="buffer size [default=512]")
     parser.add_option("-H","--hopsize",
-            metavar = "<size>",
+            metavar = "<size>", type='int',
             action="store", dest="hopsize", default=256,
             help="overlap size [default=256]")
-    parser.add_option("-t","--threshold",
+    parser.add_option("-t","--onset-threshold",
             metavar = "<value>", type="float",
             action="store", dest="threshold", default=0.3,
             help="onset peak picking threshold [default=0.3]")
@@ -114,8 +114,12 @@ def parse_args():
             help="be quiet")
     (options, args) = parser.parse_args()
     if not options.source_file:
-        print "no file name given\n", usage
-        sys.exit(1)
+        import os.path
+        if len(args) == 1:
+            options.source_file = args[0]
+        else:
+            print "no file name given\n", usage
+            sys.exit(1)
     return options, args
 
 if __name__ == '__main__':
@@ -126,12 +130,15 @@ if __name__ == '__main__':
     samplerate = options.samplerate
     source_file = options.source_file
 
-    from aubio import onset, source, sink
+    from aubio import onset, tempo, source, sink
 
     s = source(source_file, samplerate, hopsize)
     if samplerate == 0: samplerate = s.get_samplerate()
 
-    o = onset(options.onset_method, bufsize, hopsize)
+    if options.beat:
+        o = tempo(options.onset_method, bufsize, hopsize)
+    else:
+        o = onset(options.onset_method, bufsize, hopsize)
     o.set_threshold(options.threshold)
 
     timestamps = []
@@ -140,12 +147,11 @@ if __name__ == '__main__':
     while True:
         samples, read = s()
         if o(samples):
-            this_onset = o.get_last_onset()
-            if options.verbose: print "%.4f" % o.get_last_onset_s()
-            timestamps.append (this_onset)
+            timestamps.append (o.get_last())
+            if options.verbose: print "%.4f" % o.get_last_s()
         total_frames += read
         if read < hopsize: break
-
+    del s
     # print some info
     nstamps = len(timestamps)
     duration = float (total_frames) / float(samplerate)
@@ -161,8 +167,8 @@ if __name__ == '__main__':
         def new_sink_name(source_base_name, timestamp):
             return source_base_name + '_%02.3f' % (timestamp) + '.wav'
         # reopen source file
-        del s
         s = source(source_file, samplerate, hopsize)
+        if samplerate == 0: samplerate = s.get_samplerate()
         # create first sink at 0
         g = sink(new_sink_name(source_base_name, 0.), samplerate)
         total_frames = 0

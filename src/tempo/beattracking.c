@@ -31,6 +31,8 @@ void aubio_beattracking_checkstate (aubio_beattracking_t * bt);
 
 struct _aubio_beattracking_t
 {
+  uint_t hop_size;       /** length of one tempo detection function sample, in audio samples */
+  uint_t samplerate;     /** samplerate of the original signal */
   fvec_t *rwv;           /** rayleigh weighting for beat period in general model */
   fvec_t *dfwv;          /** exponential weighting for beat alignment in general model */
   fvec_t *gwv;           /** gaussian weighting for beat period in context dependant model */
@@ -54,14 +56,15 @@ struct _aubio_beattracking_t
 };
 
 aubio_beattracking_t *
-new_aubio_beattracking (uint_t winlen)
+new_aubio_beattracking (uint_t winlen, uint_t hop_size, uint_t samplerate)
 {
 
   aubio_beattracking_t *p = AUBIO_NEW (aubio_beattracking_t);
   uint_t i = 0;
-  /* parameter for rayleigh weight vector - sets preferred tempo to
-   * 120bpm [43] */
-  smpl_t rayparam = 48. / 512. * winlen;
+  p->hop_size = hop_size;
+  p->samplerate = samplerate;
+  /* default value for rayleigh weighting - sets preferred tempo to 120bpm */
+  smpl_t rayparam = 60. * samplerate / 120. / hop_size;
   smpl_t dfwvnorm = EXP ((LOG (2.0) / rayparam) * (winlen + 2));
   /* length over which beat period is found [128] */
   uint_t laglen = winlen / 4;
@@ -170,9 +173,11 @@ aubio_beattracking_do (aubio_beattracking_t * bt, fvec_t * dfframe,
 
   /* find non-zero Rayleigh period */
   maxindex = fvec_max_elem (bt->acfout);
-  bt->rp = maxindex ? fvec_quadint (bt->acfout, maxindex) : 1;
-  //rp = (maxindex==127) ? 43 : maxindex; //rayparam
-  bt->rp = (maxindex == bt->acfout->length - 1) ? bt->rayparam : maxindex;      //rayparam
+  if (maxindex > 0 && maxindex < bt->acfout->length - 1) {
+    bt->rp = fvec_quadratic_peak_pos (bt->acfout, maxindex);
+  } else {
+    bt->rp = bt->rayparam;
+  }
 
   /* activate biased filterbank */
   aubio_beattracking_checkstate (bt);
@@ -182,6 +187,10 @@ aubio_beattracking_do (aubio_beattracking_t * bt, fvec_t * dfframe,
   bp = bt->bp;
   /* end of biased filterbank */
 
+  if (bp == 0) {
+    fvec_zeros(output);
+    return;
+  }
 
   /* deliberate integer operation, could be set to 3 max eventually */
   kmax = FLOOR (winlen / bp);
@@ -203,7 +212,7 @@ aubio_beattracking_do (aubio_beattracking_t * bt, fvec_t * dfframe,
 #endif /* AUBIO_BEAT_WARNINGS */
     phase = step - bt->lastbeat;
   } else {
-    phase = fvec_quadint (bt->phout, maxindex);
+    phase = fvec_quadratic_peak_pos (bt->phout, maxindex);
   }
   /* take back one frame delay */
   phase += 1.;
@@ -291,11 +300,7 @@ aubio_beattracking_checkstate (aubio_beattracking_t * bt)
   fvec_t *acfout = bt->acfout;
 
   if (gp) {
-    // doshiftfbank again only if context dependent model is in operation
-    //acfout = doshiftfbank(acf,gwv,timesig,laglen,acfout); 
-    //don't need acfout now, so can reuse vector
-    // gwv is, in first loop, definitely all zeros, but will have
-    // proper values when context dependent model is activated
+    // compute shift invariant comb filterbank
     fvec_zeros (acfout);
     for (i = 1; i < laglen - 1; i++) {
       for (a = 1; a <= bt->timesig; a++) {
@@ -304,12 +309,9 @@ aubio_beattracking_checkstate (aubio_beattracking_t * bt)
         }
       }
     }
+    // since gp is set, gwv has been computed in previous checkstate
     fvec_weight (acfout, bt->gwv);
-    gp = fvec_quadint (acfout, fvec_max_elem (acfout));
-    /*
-       while(gp<32) gp =gp*2;
-       while(gp>64) gp = gp/2;
-     */
+    gp = fvec_quadratic_peak_pos (acfout, fvec_max_elem (acfout));
   } else {
     //still only using general model
     gp = 0;
@@ -381,7 +383,7 @@ aubio_beattracking_checkstate (aubio_beattracking_t * bt)
   /* do some further checks on the final bp value */
 
   /* if tempo is > 206 bpm, half it */
-  while (bp < 25) {
+  while (0 < bp && bp < 25) {
 #if AUBIO_BEAT_WARNINGS
     AUBIO_WRN ("doubling from %f (%f bpm) to %f (%f bpm)\n",
         bp, 60.*44100./512./bp, bp/2., 60.*44100./512./bp/2. );
@@ -408,8 +410,8 @@ aubio_beattracking_checkstate (aubio_beattracking_t * bt)
 smpl_t
 aubio_beattracking_get_bpm (aubio_beattracking_t * bt)
 {
-  if (bt->timesig != 0 && bt->counter == 0 && bt->flagstep == 0) {
-    return 5168. / fvec_quadint (bt->acfout, bt->bp);
+  if (bt->bp != 0) {
+    return 60. * bt->samplerate/ bt->bp / bt->hop_size;
   } else {
     return 0.;
   }
@@ -419,7 +421,7 @@ smpl_t
 aubio_beattracking_get_confidence (aubio_beattracking_t * bt)
 {
   if (bt->gp) {
-    return fvec_max (bt->acfout);
+    return fvec_max (bt->acfout) / fvec_sum(bt->acfout);
   } else {
     return 0.;
   }

@@ -4,6 +4,7 @@
 
 extern void add_generated_objects ( PyObject *m );
 extern void add_ufuncs ( PyObject *m );
+extern int generated_types_ready(void);
 
 static char Py_alpha_norm_doc[] = "compute alpha normalisation factor";
 
@@ -197,6 +198,7 @@ init_aubio (void)
       || (PyType_Ready (&Py_filterbankType) < 0)
       || (PyType_Ready (&Py_fftType) < 0)
       || (PyType_Ready (&Py_pvocType) < 0)
+      || (PyType_Ready (&Py_sourceType) < 0)
       // generated objects
       || (generated_types_ready() < 0 )
   ) {
@@ -225,6 +227,8 @@ init_aubio (void)
   PyModule_AddObject (m, "fft", (PyObject *) & Py_fftType);
   Py_INCREF (&Py_pvocType);
   PyModule_AddObject (m, "pvoc", (PyObject *) & Py_pvocType);
+  Py_INCREF (&Py_sourceType);
+  PyModule_AddObject (m, "source", (PyObject *) & Py_sourceType);
 
   // add generated objects
   add_generated_objects(m);

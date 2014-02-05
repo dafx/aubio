@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2009 Paul Brossier <piem@aubio.org>
+  Copyright (C) 2003-2013 Paul Brossier <piem@aubio.org>
 
   This file is part of aubio.
 
@@ -25,8 +25,8 @@
  * Big hacks to implement an histogram
  */
 
-#ifndef HIST_H
-#define HIST_H
+#ifndef _AUBIO_HIST_H
+#define _AUBIO_HIST_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,10 +36,12 @@ extern "C" {
 typedef struct _aubio_hist_t aubio_hist_t;
 
 /** histogram creation
- * \param flow minimum input
- * \param fhig maximum input
- * \param nelems number of histogram columns
- */
+
+  \param flow minimum input
+  \param fhig maximum input
+  \param nelems number of histogram columns
+
+*/
 aubio_hist_t * new_aubio_hist(smpl_t flow, smpl_t fhig, uint_t nelems);
 /** histogram deletion */
 void del_aubio_hist(aubio_hist_t *s);
@@ -58,4 +60,4 @@ void aubio_hist_dyn_notnull (aubio_hist_t *s, fvec_t *input);
 }
 #endif
 
-#endif
+#endif /* _AUBIO_HIST_H */

@@ -26,6 +26,9 @@
 #include "musicutils.h"
 //#include "config.h"
 
+#ifdef HAVE_ACCELERATE
+#include <Accelerate/Accelerate.h>
+#endif
 
 /** Window types */
 typedef enum
@@ -46,7 +49,14 @@ fvec_t *
 new_aubio_window (char_t * window_type, uint_t length)
 {
   fvec_t * win = new_fvec (length);
-  fvec_set_window (win, window_type);
+  if (win == NULL) {
+    return NULL;
+  }
+  uint_t err = fvec_set_window (win, window_type);
+  if (err != 0) {
+    del_fvec(win);
+    return NULL;
+  }
   return win;
 }
 
@@ -169,46 +179,84 @@ fvec_sum (fvec_t * s)
 smpl_t
 fvec_max (fvec_t * s)
 {
+#ifndef HAVE_ACCELERATE
   uint_t j;
   smpl_t tmp = 0.0;
   for (j = 0; j < s->length; j++) {
     tmp = (tmp > s->data[j]) ? tmp : s->data[j];
   }
+#else
+  smpl_t tmp = 0.;
+#if !HAVE_AUBIO_DOUBLE
+  vDSP_maxv(s->data, 1, &tmp, s->length);
+#else
+  vDSP_maxvD(s->data, 1, &tmp, s->length);
+#endif
+#endif
   return tmp;
 }
 
 smpl_t
 fvec_min (fvec_t * s)
 {
+#ifndef HAVE_ACCELERATE
   uint_t j;
   smpl_t tmp = s->data[0];
   for (j = 0; j < s->length; j++) {
     tmp = (tmp < s->data[j]) ? tmp : s->data[j];
   }
+#else
+  smpl_t tmp = 0.;
+#if !HAVE_AUBIO_DOUBLE
+  vDSP_minv(s->data, 1, &tmp, s->length);
+#else
+  vDSP_minvD(s->data, 1, &tmp, s->length);
+#endif
+#endif
   return tmp;
 }
 
 uint_t
 fvec_min_elem (fvec_t * s)
 {
+#ifndef HAVE_ACCELERATE
   uint_t j, pos = 0.;
   smpl_t tmp = s->data[0];
   for (j = 0; j < s->length; j++) {
     pos = (tmp < s->data[j]) ? pos : j;
     tmp = (tmp < s->data[j]) ? tmp : s->data[j];
   }
+#else
+  smpl_t tmp = 0.;
+  uint_t pos = 0.;
+#if !HAVE_AUBIO_DOUBLE
+  vDSP_minvi(s->data, 1, &tmp, (vDSP_Length *)&pos, s->length);
+#else
+  vDSP_minviD(s->data, 1, &tmp, (vDSP_Length *)&pos, s->length);
+#endif
+#endif
   return pos;
 }
 
 uint_t
 fvec_max_elem (fvec_t * s)
 {
+#ifndef HAVE_ACCELERATE
   uint_t j, pos = 0;
   smpl_t tmp = 0.0;
   for (j = 0; j < s->length; j++) {
     pos = (tmp > s->data[j]) ? pos : j;
     tmp = (tmp > s->data[j]) ? tmp : s->data[j];
   }
+#else
+  smpl_t tmp = 0.;
+  uint_t pos = 0.;
+#if !HAVE_AUBIO_DOUBLE
+  vDSP_maxvi(s->data, 1, &tmp, (vDSP_Length *)&pos, s->length);
+#else
+  vDSP_maxviD(s->data, 1, &tmp, (vDSP_Length *)&pos, s->length);
+#endif
+#endif
   return pos;
 }
 
@@ -222,7 +270,7 @@ fvec_shift (fvec_t * s)
 }
 
 smpl_t
-fvec_local_energy (fvec_t * f)
+aubio_level_lin (fvec_t * f)
 {
   smpl_t energy = 0.;
   uint_t j;
@@ -367,20 +415,9 @@ smpl_t fvec_median (fvec_t * input) {
   }
 }
 
-smpl_t fvec_quadint (fvec_t * x, uint_t pos) {
-  smpl_t s0, s1, s2;
-  uint_t x0 = (pos < 1) ? pos : pos - 1;
-  uint_t x2 = (pos + 1 < x->length) ? pos + 1 : pos;
-  if (x0 == pos) return (x->data[pos] <= x->data[x2]) ? pos : x2;
-  if (x2 == pos) return (x->data[pos] <= x->data[x0]) ? pos : x0;
-  s0 = x->data[x0];
-  s1 = x->data[pos];
-  s2 = x->data[x2];
-  return pos + 0.5 * (s2 - s0 ) / (s2 - 2.* s1 + s0);
-}
-
 smpl_t fvec_quadratic_peak_pos (fvec_t * x, uint_t pos) {
   smpl_t s0, s1, s2;
+  if (pos == 0 || pos == x->length - 1) return pos;
   uint_t x0 = (pos < 1) ? pos : pos - 1;
   uint_t x2 = (pos + 1 < x->length) ? pos + 1 : pos;
   if (x0 == pos) return (x->data[pos] <= x->data[x2]) ? pos : x2;
@@ -478,7 +515,7 @@ aubio_next_power_of_two (uint_t a)
 smpl_t
 aubio_db_spl (fvec_t * o)
 {
-  return 10. * LOG10 (fvec_local_energy (o));
+  return 10. * LOG10 (aubio_level_lin (o));
 }
 
 uint_t

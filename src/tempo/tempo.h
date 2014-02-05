@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2006-2009 Paul Brossier <piem@aubio.org>
+  Copyright (C) 2006-2013 Paul Brossier <piem@aubio.org>
 
   This file is part of aubio.
 
@@ -26,11 +26,12 @@
   and returns the estimated beat locations.
 
   \example tempo/test-tempo.c
+  \example examples/aubiotrack.c
 
 */
 
-#ifndef TEMPO_H
-#define TEMPO_H
+#ifndef _AUBIO_TEMPO_H
+#define _AUBIO_TEMPO_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +42,7 @@ typedef struct _aubio_tempo_t aubio_tempo_t;
 
 /** create tempo detection object
 
+  \param method beat tracking method, unused for now (use "default")
   \param buf_size length of FFT
   \param hop_size number of frames between two consecutive runs
   \param samplerate sampling rate of the signal to analyze
@@ -84,7 +86,7 @@ smpl_t aubio_tempo_get_last_ms (aubio_tempo_t *o);
 /** set tempo detection silence threshold
 
   \param o beat tracking object
-  \param threshold new silence threshold, in dB
+  \param silence new silence threshold, in dB
 
   \return `0` if successful, non-zero otherwise
 
@@ -131,4 +133,4 @@ void del_aubio_tempo(aubio_tempo_t * o);
 }
 #endif
 
-#endif /* TEMPO_H */
+#endif /* _AUBIO_TEMPO_H */

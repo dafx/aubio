@@ -33,16 +33,36 @@ def generate_object_files(output_path):
 
   generated_objects = []
   cpp_output, cpp_objects = get_cpp_objects()
-  skip_objects = ['fft',
+  skip_objects = [
+      # already in ext/
+      'fft',
       'pvoc',
       'filter',
       'filterbank',
+      #'resampler',
+      # AUBIO_UNSTABLE
+      'hist',
+      'parameter',
+      'scale',
+      'beattracking',
       'resampler',
       'sndfile',
+      'peakpicker',
+      'pitchfcomb',
+      'pitchmcomb',
+      'pitchschmitt',
+      'pitchspecacf',
+      'pitchyin',
+      'pitchyinfft',
       'sink_apple_audio',
       'sink_sndfile',
+      'source',
       'source_apple_audio',
-      'source_sndfile']
+      'source_sndfile',
+      'source_avcodec',
+      #'sampler',
+      'audio_unit',
+      ]
 
   write_msg("-- INFO: %d objects in total" % len(cpp_objects))
 
@@ -179,7 +199,7 @@ void add_generated_objects ( PyObject *m )
 
   s = """// generated list of objects created with generator.py
 
-#include "Python.h"
+#include <Python.h>
 
 """
 

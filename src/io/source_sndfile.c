@@ -58,7 +58,7 @@ struct _aubio_source_sndfile_t {
 
   // some temporary memory for sndfile to write at
   uint_t scratch_size;
-  smpl_t *scratch_data;
+  float *scratch_data;
 };
 
 aubio_source_sndfile_t * new_aubio_source_sndfile(char_t * path, uint_t samplerate, uint_t hop_size) {
@@ -66,14 +66,22 @@ aubio_source_sndfile_t * new_aubio_source_sndfile(char_t * path, uint_t samplera
 
   if (path == NULL) {
     AUBIO_ERR("Aborted opening null path\n");
-    return NULL;
+    goto beach;
+  }
+  if ((sint_t)samplerate < 0) {
+    AUBIO_ERR("Can not open %s with samplerate %d\n", path, samplerate);
+    goto beach;
+  }
+  if ((sint_t)hop_size <= 0) {
+    AUBIO_ERR("Can not open %s with hop_size %d\n", path, hop_size);
+    goto beach;
   }
 
   s->hop_size = hop_size;
   s->channels = 1;
   s->path = path;
 
-  // try opening the file, geting the info in sfinfo
+  // try opening the file, getting the info in sfinfo
   SF_INFO sfinfo;
   AUBIO_MEMSET(&sfinfo, 0, sizeof (sfinfo));
   s->handle = sf_open (s->path, SFM_READ, &sfinfo);
@@ -113,10 +121,12 @@ aubio_source_sndfile_t * new_aubio_source_sndfile(char_t * path, uint_t samplera
     if (s->ratio > 1) {
       // we would need to add a ring buffer for these
       if ( (uint_t)(s->input_hop_size * s->ratio + .5)  != s->hop_size ) {
-        AUBIO_ERR("can not upsample from %d to %d\n", s->input_samplerate, s->samplerate);
+        AUBIO_ERR("can not upsample %s from %d to %d\n", s->path,
+            s->input_samplerate, s->samplerate);
         goto beach;
       }
-      AUBIO_WRN("upsampling %s from %d to % d\n", s->path, s->input_samplerate, s->samplerate);
+      AUBIO_WRN("upsampling %s from %d to %d\n", s->path,
+          s->input_samplerate, s->samplerate);
     }
   }
 #else
@@ -133,8 +143,8 @@ aubio_source_sndfile_t * new_aubio_source_sndfile(char_t * path, uint_t samplera
   return s;
 
 beach:
-  AUBIO_ERR("can not read %s at samplerate %dHz with a hop_size of %d\n",
-      s->path, s->samplerate, s->hop_size);
+  //AUBIO_ERR("can not read %s at samplerate %dHz with a hop_size of %d\n",
+  //    s->path, s->samplerate, s->hop_size);
   del_aubio_source_sndfile(s);
   return NULL;
 }
@@ -198,18 +208,30 @@ void aubio_source_sndfile_do_multi(aubio_source_sndfile_t * s, fmat_t * read_dat
     data = read_data->data;
   }
 
-  /* de-interleaving data */
-  for (j = 0; j < read_samples / input_channels; j++) {
-    for (i = 0; i < input_channels; i++) {
-      data[i][j] = (smpl_t)s->scratch_data[input_channels*j+i];
+  if (read_data->height < input_channels) {
+    // destination matrix has less channels than the file; copy only first
+    // channels of the file, de-interleaving data
+    for (j = 0; j < read_samples / input_channels; j++) {
+      for (i = 0; i < read_data->height; i++) {
+        data[i][j] = (smpl_t)s->scratch_data[j * input_channels + i];
+      }
+    }
+  } else {
+    // destination matrix has as many or more channels than the file; copy each
+    // channel from the file to the destination matrix, de-interleaving data
+    for (j = 0; j < read_samples / input_channels; j++) {
+      for (i = 0; i < input_channels; i++) {
+        data[i][j] = (smpl_t)s->scratch_data[j * input_channels + i];
+      }
     }
   }
-  // if read_data has more channels than the file
+
   if (read_data->height > input_channels) {
-    // copy last channel to all additional channels
+    // destination matrix has more channels than the file; copy last channel
+    // of the file to each additional channels, de-interleaving data
     for (j = 0; j < read_samples / input_channels; j++) {
       for (i = input_channels; i < read_data->height; i++) {
-        data[i][j] = s->scratch_data[ j * input_channels + (input_channels - 1)];
+        data[i][j] = (smpl_t)s->scratch_data[j * input_channels + (input_channels - 1)];
       }
     }
   }

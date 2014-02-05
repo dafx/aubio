@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2009 Paul Brossier <piem@aubio.org>
+  Copyright (C) 2003-2013 Paul Brossier <piem@aubio.org>
 
   This file is part of aubio.
 
@@ -27,53 +27,29 @@
 #include <string.h>             /* for strcmp */
 #include <aubio.h>
 #include "config.h"
-#ifdef HAVE_JACK
-#include "jackio.h"
-#endif /* HAVE_JACK */
 
 #ifdef HAVE_C99_VARARGS_MACROS
-#define debug(...)              if (verbose) fprintf (stderr, __VA_ARGS__)
-#define errmsg(...)             fprintf (stderr, __VA_ARGS__)
-#define outmsg(...)             fprintf (stdout, __VA_ARGS__)
+#ifdef HAVE_DEBUG
+#define debug(...)                fprintf (stderr, __VA_ARGS__)
 #else
-#define debug(format, args...)  if (verbose) fprintf(stderr, format , ##args)
-#define errmsg(format, args...) fprintf(stderr, format , ##args)
-#define outmsg(format, args...) fprintf(stdout, format , ##args)
+#define debug(...)
+#endif
+#define verbmsg(...)              if (verbose) fprintf (stderr, __VA_ARGS__)
+#define errmsg(...)               fprintf (stderr, __VA_ARGS__)
+#define outmsg(...)               fprintf (stdout, __VA_ARGS__)
+#else
+#ifdef HAVE_DEBUG
+#define debug(...)                fprintf (stderr, format , **args)
+#else
+#define debug(...)                ()
+#endif
+#define verbmsg(format, args...)  if (verbose) fprintf(stderr, format , ##args)
+#define errmsg(format, args...)   fprintf(stderr, format , ##args)
+#define outmsg(format, args...)   fprintf(stdout, format , ##args)
 #endif
 
-
-extern int frames;
-extern int verbose;
-extern int usejack;
-extern int frames_delay;
-/* defined in utils.c */
-void usage (FILE * stream, int exit_code);
-int parse_args (int argc, char **argv);
-void examples_common_init (int argc, char **argv);
-void examples_common_del (void);
 typedef void (aubio_print_func_t) (void);
-#ifndef HAVE_JACK
-typedef int (*aubio_process_func_t)
-  (smpl_t ** input, smpl_t ** output, int nframes);
-#endif
-void examples_common_process (aubio_process_func_t process_func,
-    aubio_print_func_t print);
-
-extern char_t * pitch_unit;
-extern char_t * pitch_mode;
-
 void send_noteon (int pitch, int velo);
 
-extern const char *sink_uri;
-extern char_t * onset_mode;
-extern smpl_t threshold;
-extern smpl_t silence;
-extern int verbose;
-extern int usejack;
-extern uint_t buffer_size;
-extern uint_t overlap_size;
-extern uint_t samplerate;
-
-extern fvec_t *ibuf;
-extern fvec_t *obuf;
-extern fvec_t *woodblock;
+/** common process function */
+typedef int (*aubio_process_func_t) (fvec_t * input, fvec_t * output);
