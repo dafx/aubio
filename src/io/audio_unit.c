@@ -18,7 +18,7 @@
 
 */
 
-#include "config.h"
+#include "../config.h"
 #ifdef TARGET_OS_IPHONE
 #include "aubio_priv.h"
 
