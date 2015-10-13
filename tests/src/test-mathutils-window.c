@@ -1,8 +1,7 @@
-#include <aubio.h>
-#include <math.h>
-#include <stdio.h>
+#include "aubio.h"
+#include "utils_tests.h"
 
-int main ()
+int main (void)
 {
   uint_t length = 0;
   uint_t n_length = 4, n_types = 10, i, t;

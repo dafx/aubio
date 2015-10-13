@@ -23,12 +23,16 @@
 
 /** \file
 
-  Media source to read blocks of consecutive audio samples from file
-
-  Depending on how aubio was compiled, the following file formats will be
-  available.
+  Media source to read blocks of consecutive audio samples from file.
 
   To write to file, use ::aubio_sink_t.
+
+  Depending on how aubio was compiled, the following sources will be available.
+
+  When creating a new source using ::new_aubio_source, the new function of each
+  of the compiled-in sources will be used, in the following order, until one of
+  them gets successfully created. If all sources returned NULL,
+  ::new_aubio_source will return NULL.
 
   \b \p source_avcodec : libav
 
@@ -37,7 +41,7 @@
   different network protocols such as HTTP.
 
   \b \p source_apple_audio : ExtAudioFileRef
-  
+
   On Mac and iOS platforms, aubio should be compiled with CoreAudio [Extended
   Audio File Services]
   (https://developer.apple.com/library/mac/documentation/MusicAudio/Reference/ExtendedAudioFileServicesReference/Reference/reference.html).
@@ -49,6 +53,10 @@
   Also optional, aubio can be built against
   [libsndfile](http://www.mega-nerd.com/libsndfile/), which can read [most
   uncompressed formats](http://www.mega-nerd.com/libsndfile/#Features).
+
+  \b \p source_wavread : native WAV reader
+
+  A simple source to read from 16-bits PCM RIFF encoded WAV files.
 
   \example io/test-source.c
   \example io/test-source_multi.c
@@ -138,6 +146,17 @@ uint_t aubio_source_get_channels (aubio_source_t * s);
 
 */
 uint_t aubio_source_seek (aubio_source_t * s, uint_t pos);
+
+/**
+
+  close source object
+
+  \param s source object, created with ::new_aubio_source
+
+  \return 0 if sucessful, non-zero on failure
+
+ */
+uint_t aubio_source_close (aubio_source_t *s);
 
 /**
 

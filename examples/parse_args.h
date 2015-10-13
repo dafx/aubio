@@ -47,6 +47,7 @@ extern void examples_common_init (int argc, char **argv);
 extern void examples_common_del (void);
 extern void examples_common_process (aubio_process_func_t process_func,
     aubio_print_func_t print);
+int parse_args (int argc, char **argv);
 
 // internal stuff
 extern int blocks;
@@ -56,8 +57,9 @@ extern fvec_t *obuf;
 
 const char *prog_name;
 
-void
-usage (FILE * stream, int exit_code)
+void usage (FILE * stream, int exit_code);
+
+void usage (FILE * stream, int exit_code)
 {
   fprintf (stream, "usage: %s [ options ] \n", prog_name);
   fprintf (stream,
@@ -66,21 +68,33 @@ usage (FILE * stream, int exit_code)
       "       -o      --output           output file\n"
 #endif
       "       -r      --samplerate       select samplerate\n"
+      "                 use 0 to use input source samplerate, or 32000 to force 32kHz\n"
       "       -B      --bufsize          set buffer size\n"
+      "                 number of frames to run the analysis on\n"
       "       -H      --hopsize          set hopsize\n"
+      "                 number of frames to read from source before each analysis\n"
 #ifdef PROG_HAS_ONSET
       "       -O      --onset            select onset detection algorithm\n"
+      "                 <default|energy|hfc|complex|phase|specdiff|kl|mkl|specflux>;\n"
+      "                 default=hfc\n"
       "       -t      --onset-threshold  set onset detection threshold\n"
+      "                 a value between 0.1 (more detections) and 1 (less); default=0.3\n"
 #endif /* PROG_HAS_ONSET */
 #ifdef PROG_HAS_PITCH
       "       -p      --pitch            select pitch detection algorithm\n"
+      "                 <default|yinfft|yin|mcomb|fcomb|schmitt>; default=yinfft\n"
       "       -u      --pitch-unit       select pitch output unit\n"
+      "                 <default|freq|hertz|Hz|midi|cent|bin>; default=freq\n"
       "       -l      --pitch-tolerance  select pitch tolerance\n"
+      "                 (yin, yinfft only) a value between 0.1 and 0.7; default=0.3\n"
 #endif /* PROG_HAS_PITCH */
       "       -s      --silence          select silence threshold\n"
+      "                 a value in dB, for instance -70, or -100; default=-90\n"
 #ifdef PROG_HAS_OUTPUT
       "       -m      --mix-input        mix input signal with output signal\n"
+      "                 input signal will be added to output synthesis\n"
       "       -f      --force-overwrite  overwrite output file if needed\n"
+      "                 do not fail if output file already exists\n"
 #endif
 #ifdef PROG_HAS_JACK
       "       -j      --jack             use Jack\n"
@@ -240,8 +254,8 @@ parse_args (int argc, char **argv)
   } else if ((sint_t)buffer_size < 2) {
     errmsg("Error: got buffer_size %d, but can not be < 2\n", buffer_size);
     usage ( stderr, 1 );
-  } else if ((sint_t)buffer_size < (sint_t)hop_size + 1) {
-    errmsg("Error: hop size (%d) is larger than or equal to win size (%d)\n",
+  } else if ((sint_t)buffer_size < (sint_t)hop_size) {
+    errmsg("Error: hop size (%d) is larger than win size (%d)\n",
         hop_size, buffer_size);
     usage ( stderr, 1 );
   }

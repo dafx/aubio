@@ -22,13 +22,14 @@
 
   Pitch detection using the YIN algorithm
 
-  This algorithm was developped by A. de Cheveigne and H. Kawahara and
+  This algorithm was developed by A. de Cheveigne and H. Kawahara and
   published in:
 
   De Cheveigné, A., Kawahara, H. (2002) "YIN, a fundamental frequency
   estimator for speech and music", J. Acoust. Soc. Am. 111, 1917-1930.
 
   see http://recherche.ircam.fr/equipes/pcm/pub/people/cheveign.html
+      http://recherche.ircam.fr/equipes/pcm/cheveign/ps/2002_JASA_YIN_proof.pdf
 
   \example pitch/test-pitchyin.c
 

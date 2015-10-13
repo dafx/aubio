@@ -57,6 +57,8 @@ static const smpl_t weight[] = {
 aubio_pitchyinfft_t *
 new_aubio_pitchyinfft (uint_t samplerate, uint_t bufsize)
 {
+  uint_t i = 0, j = 1;
+  smpl_t freq = 0, a0 = 0, a1 = 0, f0 = 0, f1 = 0;
   aubio_pitchyinfft_t *p = AUBIO_NEW (aubio_pitchyinfft_t);
   p->winput = new_fvec (bufsize);
   p->fft = new_aubio_fft (bufsize);
@@ -66,8 +68,6 @@ new_aubio_pitchyinfft (uint_t samplerate, uint_t bufsize)
   p->tol = 0.85;
   p->win = new_aubio_window ("hanningz", bufsize);
   p->weight = new_fvec (bufsize / 2 + 1);
-  uint_t i = 0, j = 1;
-  smpl_t freq = 0, a0 = 0, a1 = 0, f0 = 0, f1 = 0;
   for (i = 0; i < p->weight->length; i++) {
     freq = (smpl_t) i / (smpl_t) bufsize *(smpl_t) samplerate;
     while (freq > freqs[j]) {
@@ -135,7 +135,11 @@ aubio_pitchyinfft_do (aubio_pitchyinfft_t * p, fvec_t * input, fvec_t * output)
     yin->data[tau] = sum - fftout->data[tau];
     // and the cumulative mean normalized difference function
     tmp += yin->data[tau];
-    yin->data[tau] *= tau / tmp;
+    if (tmp != 0) {
+      yin->data[tau] *= tau / tmp;
+    } else {
+      yin->data[tau] = 1.;
+    }
   }
   // find best candidates
   tau = fvec_min_elem (yin);

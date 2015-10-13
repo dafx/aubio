@@ -61,20 +61,21 @@ struct _aubio_source_avcodec_t {
 
 // hack to create or re-create the context the first time _do or _do_multi is called
 void aubio_source_avcodec_reset_resampler(aubio_source_avcodec_t * s, uint_t multi);
+void aubio_source_avcodec_readframe(aubio_source_avcodec_t *s, uint_t * read_samples);
 
 aubio_source_avcodec_t * new_aubio_source_avcodec(char_t * path, uint_t samplerate, uint_t hop_size) {
   aubio_source_avcodec_t * s = AUBIO_NEW(aubio_source_avcodec_t);
   int err;
   if (path == NULL) {
-    AUBIO_ERR("Aborted opening null path\n");
+    AUBIO_ERR("source_avcodec: Aborted opening null path\n");
     goto beach;
   }
   if ((sint_t)samplerate < 0) {
-    AUBIO_ERR("Can not open %s with samplerate %d\n", path, samplerate);
+    AUBIO_ERR("source_avcodec: Can not open %s with samplerate %d\n", path, samplerate);
     goto beach;
   }
   if ((sint_t)hop_size <= 0) {
-    AUBIO_ERR("Can not open %s with hop_size %d\n", path, hop_size);
+    AUBIO_ERR("source_avcodec: Can not open %s with hop_size %d\n", path, hop_size);
     goto beach;
   }
 
@@ -94,7 +95,7 @@ aubio_source_avcodec_t * new_aubio_source_avcodec(char_t * path, uint_t samplera
   if ( (err = avformat_open_input(&avFormatCtx, s->path, NULL, NULL) ) < 0 ) {
     char errorstr[256];
     av_strerror (err, errorstr, sizeof(errorstr));
-    AUBIO_ERR("Failed opening %s (%s)\n", s->path, errorstr);
+    AUBIO_ERR("source_avcodec: Failed opening %s (%s)\n", s->path, errorstr);
     goto beach;
   }
 
@@ -105,7 +106,7 @@ aubio_source_avcodec_t * new_aubio_source_avcodec(char_t * path, uint_t samplera
   if ( (err = avformat_find_stream_info(avFormatCtx, NULL)) < 0 ) {
     char errorstr[256];
     av_strerror (err, errorstr, sizeof(errorstr));
-    AUBIO_ERR("Could not find stream information " "for %s (%s)\n", s->path,
+    AUBIO_ERR("source_avcodec: Could not find stream information " "for %s (%s)\n", s->path,
         errorstr);
     goto beach;
   }
@@ -121,13 +122,13 @@ aubio_source_avcodec_t * new_aubio_source_avcodec(char_t * path, uint_t samplera
       if (selected_stream == -1) {
         selected_stream = i;
       } else {
-        AUBIO_WRN("More than one audio stream in %s, "
+        AUBIO_WRN("source_avcodec: More than one audio stream in %s, "
             "taking the first one\n", s->path);
       }
     }
   }
   if (selected_stream == -1) {
-    AUBIO_ERR("No audio stream in %s\n", s->path);
+    AUBIO_ERR("source_avcodec: No audio stream in %s\n", s->path);
     goto beach;
   }
   //AUBIO_DBG("Taking stream %d in file %s\n", selected_stream, s->path);
@@ -137,14 +138,14 @@ aubio_source_avcodec_t * new_aubio_source_avcodec(char_t * path, uint_t samplera
   avCodecCtx = avFormatCtx->streams[selected_stream]->codec;
   AVCodec *codec = avcodec_find_decoder(avCodecCtx->codec_id);
   if (codec == NULL) {
-    AUBIO_ERR("Could not find decoder for %s", s->path);
+    AUBIO_ERR("source_avcodec: Could not find decoder for %s", s->path);
     goto beach;
   }
 
   if ( ( err = avcodec_open2(avCodecCtx, codec, NULL) ) < 0) {
     char errorstr[256];
     av_strerror (err, errorstr, sizeof(errorstr));
-    AUBIO_ERR("Could not load codec for %s (%s)\n", s->path, errorstr);
+    AUBIO_ERR("source_avcodec: Could not load codec for %s (%s)\n", s->path, errorstr);
     goto beach;
   }
 
@@ -161,14 +162,14 @@ aubio_source_avcodec_t * new_aubio_source_avcodec(char_t * path, uint_t samplera
   s->samplerate = samplerate;
 
   if (s->samplerate >  s->input_samplerate) {
-    AUBIO_WRN("upsampling %s from %d to %d\n", s->path,
+    AUBIO_WRN("source_avcodec: upsampling %s from %d to %d\n", s->path,
         s->input_samplerate, s->samplerate);
   }
 
   AVFrame *avFrame = s->avFrame;
-  avFrame = avcodec_alloc_frame();
+  avFrame = av_frame_alloc();
   if (!avFrame) {
-    AUBIO_ERR("Could not allocate frame for (%s)\n", s->path);
+    AUBIO_ERR("source_avcodec: Could not allocate frame for (%s)\n", s->path);
   }
 
   /* allocate output for avr */
@@ -221,7 +222,7 @@ void aubio_source_avcodec_reset_resampler(aubio_source_avcodec_t * s, uint_t mul
     if ( ( err = avresample_open(avr) ) < 0) {
       char errorstr[256];
       av_strerror (err, errorstr, sizeof(errorstr));
-      AUBIO_ERR("Could not open AVAudioResampleContext for %s (%s)\n",
+      AUBIO_ERR("source_avcodec: Could not open AVAudioResampleContext for %s (%s)\n",
           s->path, errorstr);
       //goto beach;
       return;
@@ -278,7 +279,7 @@ void aubio_source_avcodec_readframe(aubio_source_avcodec_t *s, uint_t * read_sam
         (uint8_t **)&output, out_linesize, max_out_samples,
         (uint8_t **)avFrame->data, in_linesize, in_samples);
   if (out_samples <= 0) {
-    AUBIO_ERR("No sample found while converting frame (%s)\n", s->path);
+    //AUBIO_ERR("No sample found while converting frame (%s)\n", s->path);
     goto beach;
   }
 
@@ -370,25 +371,31 @@ uint_t aubio_source_avcodec_get_channels(aubio_source_avcodec_t * s) {
 }
 
 uint_t aubio_source_avcodec_seek (aubio_source_avcodec_t * s, uint_t pos) {
-  //uint_t resampled_pos = (uint_t)ROUND(pos * s->input_samplerate * 1. / s->samplerate);
-  AUBIO_ERR("Not implemented, _seek(%d) file %s", pos, s->path);
-  return -1; //sf_seek (s->handle, resampled_pos, SEEK_SET);
+  int64_t resampled_pos = (uint_t)ROUND(pos * (s->input_samplerate * 1. / s->samplerate));
+  int64_t min_ts = MAX(resampled_pos - 2000, 0);
+  int64_t max_ts = MIN(resampled_pos + 2000, INT64_MAX);
+  int seek_flags = AVSEEK_FLAG_FRAME | AVSEEK_FLAG_ANY;
+  int ret = avformat_seek_file(s->avFormatCtx, s->selected_stream,
+      min_ts, resampled_pos, max_ts, seek_flags);
+  if (ret < 0) {
+    AUBIO_ERR("Failed seeking to %d in file %s", pos, s->path);
+  }
+  // reset read status
+  s->eof = 0;
+  s->read_index = 0;
+  s->read_samples = 0;
+  // reset the AVAudioResampleContext
+  avresample_close(s->avr);
+  avresample_open(s->avr);
+  return ret;
 }
 
-void del_aubio_source_avcodec(aubio_source_avcodec_t * s){
-  if (!s) return;
-  if (s->output != NULL) {
-    av_free(s->output);
-  }
+uint_t aubio_source_avcodec_close(aubio_source_avcodec_t * s) {
   if (s->avr != NULL) {
     avresample_close( s->avr );
     av_free ( s->avr );
   }
   s->avr = NULL;
-  if (s->avFrame != NULL) {
-    avcodec_free_frame( &(s->avFrame) );
-  }
-  s->avFrame = NULL;
   if (s->avCodecCtx != NULL) {
     avcodec_close ( s->avCodecCtx );
   }
@@ -396,8 +403,21 @@ void del_aubio_source_avcodec(aubio_source_avcodec_t * s){
   if (s->avFormatCtx != NULL) {
     avformat_close_input ( &(s->avFormatCtx) );
   }
-  s->avFrame = NULL;
   s->avFormatCtx = NULL;
+  return AUBIO_OK;
+}
+
+void del_aubio_source_avcodec(aubio_source_avcodec_t * s){
+  if (!s) return;
+  aubio_source_avcodec_close(s);
+  if (s->output != NULL) {
+    av_free(s->output);
+  }
+  s->output = NULL;
+  if (s->avFrame != NULL) {
+    av_frame_free( &(s->avFrame) );
+  }
+  s->avFrame = NULL;
   AUBIO_FREE(s);
 }
 

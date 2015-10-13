@@ -1,13 +1,14 @@
 #! /usr/bin/python
 #
-# waf build system, see http://code.google.com/p/waf/
-#
 # usage:
-#     $ ./waf distclean configure build
+#   $ python waf --help
 #
-# TODO
-#  - doc: add doxygen
-#  - tests: move to new unit test system
+# example:
+#   $ ./waf distclean configure build
+#
+# Note: aubio uses the waf build system, which relies on Python. Provided you
+# have Python installed, you do *not* need to install anything to build aubio.
+# For more info about waf, see http://code.google.com/p/waf/ .
 
 APPNAME = 'aubio'
 
@@ -71,6 +72,9 @@ def options(ctx):
     add_option_enable_disable(ctx, 'double', default = False,
             help_str = 'compile in double precision mode',
             help_disable_str = 'compile in single precision mode (default)')
+    add_option_enable_disable(ctx, 'fat', default = False,
+            help_str = 'build fat binaries (darwin only)',
+            help_disable_str = 'do not build fat binaries (default)')
 
     ctx.add_option('--with-target-platform', type='string',
             help='set target platform for cross-compilation', dest='target_platform')
@@ -85,12 +89,15 @@ def configure(ctx):
     ctx.load('waf_unit_test')
     ctx.load('gnu_dirs')
 
-    ctx.env.CFLAGS += ['-g', '-Wall', '-Wextra']
-
     target_platform = Options.platform
     if ctx.options.target_platform:
         target_platform = ctx.options.target_platform
     ctx.env['DEST_OS'] = target_platform
+
+    if 'CL.exe' not in ctx.env.CC[0]:
+        ctx.env.CFLAGS += ['-g', '-Wall', '-Wextra']
+    else:
+        ctx.env.CFLAGS += ['-Wall']
 
     if target_platform not in ['win32', 'win64']:
         ctx.env.CFLAGS += ['-fPIC']
@@ -98,23 +105,24 @@ def configure(ctx):
         ctx.define('HAVE_WIN_HACKS', 1)
         ctx.env['cshlib_PATTERN'] = 'lib%s.dll'
 
-    if target_platform == 'darwin':
+    if target_platform == 'darwin' and ctx.options.enable_fat:
         ctx.env.CFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
         ctx.env.LINKFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
+
+    if target_platform in [ 'darwin', 'ios', 'iosimulator']:
         ctx.env.FRAMEWORK = ['CoreFoundation', 'AudioToolbox', 'Accelerate']
+        ctx.define('HAVE_SOURCE_APPLE_AUDIO', 1)
+        ctx.define('HAVE_SINK_APPLE_AUDIO', 1)
         ctx.define('HAVE_ACCELERATE', 1)
 
     if target_platform in [ 'ios', 'iosimulator' ]:
-        ctx.define('HAVE_ACCELERATE', 1)
         ctx.define('TARGET_OS_IPHONE', 1)
-        ctx.env.FRAMEWORK = ['CoreFoundation', 'AudioToolbox', 'Accelerate']
-        SDKVER="7.0"
         MINSDKVER="6.1"
         ctx.env.CFLAGS += ['-std=c99']
         if target_platform == 'ios':
             DEVROOT = "/Applications/Xcode.app/Contents"
             DEVROOT += "/Developer/Platforms/iPhoneOS.platform/Developer"
-            SDKROOT = "%(DEVROOT)s/SDKs/iPhoneOS%(SDKVER)s.sdk" % locals()
+            SDKROOT = "%(DEVROOT)s/SDKs/iPhoneOS.sdk" % locals()
             ctx.env.CFLAGS += [ '-arch', 'arm64' ]
             ctx.env.CFLAGS += [ '-arch', 'armv7' ]
             ctx.env.CFLAGS += [ '-arch', 'armv7s' ]
@@ -126,7 +134,7 @@ def configure(ctx):
         else:
             DEVROOT = "/Applications/Xcode.app/Contents"
             DEVROOT += "/Developer/Platforms/iPhoneSimulator.platform/Developer"
-            SDKROOT = "%(DEVROOT)s/SDKs/iPhoneSimulator%(SDKVER)s.sdk" % locals()
+            SDKROOT = "%(DEVROOT)s/SDKs/iPhoneSimulator.sdk" % locals()
             ctx.env.CFLAGS += [ '-arch', 'i386' ]
             ctx.env.CFLAGS += [ '-arch', 'x86_64' ]
             ctx.env.LINKFLAGS += ['-arch', 'i386']
@@ -151,7 +159,8 @@ def configure(ctx):
 
     if ctx.check_cc(fragment = check_c99_varargs,
             type='cstlib',
-            msg = 'Checking for C99 __VA_ARGS__ macro'):
+            msg = 'Checking for C99 __VA_ARGS__ macro',
+            mandatory = False):
         ctx.define('HAVE_C99_VARARGS_MACROS', 1)
 
     # double precision mode
@@ -223,6 +232,9 @@ def configure(ctx):
             ctx.msg('Checking for all libav libraries', 'yes')
         else:
             ctx.msg('Checking for all libav libraries', 'not found', color = 'YELLOW')
+
+    ctx.define('HAVE_WAVREAD', 1)
+    ctx.define('HAVE_WAVWRITE', 1)
 
     # use memcpy hacks
     if (ctx.options.enable_memcpy == True):

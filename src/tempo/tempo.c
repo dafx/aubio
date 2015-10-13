@@ -28,6 +28,27 @@
 #include "../mathutils.h"
 #include "../tempo/tempo.h"
 
+// TODO implement get/set_delay
+
+/** set current delay
+
+  \param o beat tracking object
+
+  \return current delay, in samples
+
+ */
+uint_t aubio_tempo_get_delay(aubio_tempo_t * o);
+
+/** set current delay
+
+  \param o beat tracking object
+  \param delay delay to set tempo to, in samples
+
+  \return `0` if successful, non-zero otherwise
+
+ */
+uint_t aubio_tempo_set_delay(aubio_tempo_t * o, uint_t delay);
+
 /* structure to store object state */
 struct _aubio_tempo_t {
   aubio_specdesc_t * od;   /** onset detection */
@@ -88,11 +109,9 @@ void aubio_tempo_do(aubio_tempo_t *o, fvec_t * input, fvec_t * tempo)
     if (o->blockpos == FLOOR(o->out->data[i])) {
       tempo->data[0] = o->out->data[i] - FLOOR(o->out->data[i]); /* set tactus */
       /* test for silence */
-      /*
       if (aubio_silence_detection(input, o->silence)==1) {
         tempo->data[0] = 0; // unset beat if silent
       }
-      */
       o->last_beat = o->total_frames + (uint_t)ROUND(tempo->data[0] * o->hop_size);
     }
   }
@@ -129,20 +148,45 @@ uint_t aubio_tempo_set_silence(aubio_tempo_t * o, smpl_t silence) {
   return AUBIO_OK;
 }
 
+smpl_t aubio_tempo_get_silence(aubio_tempo_t * o) {
+  return o->silence;
+}
+
 uint_t aubio_tempo_set_threshold(aubio_tempo_t * o, smpl_t threshold) {
   o->threshold = threshold;
   aubio_peakpicker_set_threshold(o->pp, o->threshold);
   return AUBIO_OK;
 }
 
+smpl_t aubio_tempo_get_threshold(aubio_tempo_t * o) {
+  return o->threshold;
+}
+
 /* Allocate memory for an tempo detection */
-aubio_tempo_t * new_aubio_tempo (char_t * onset_mode, 
+aubio_tempo_t * new_aubio_tempo (char_t * tempo_mode,
     uint_t buf_size, uint_t hop_size, uint_t samplerate)
 {
   aubio_tempo_t * o = AUBIO_NEW(aubio_tempo_t);
+  char_t specdesc_func[20];
   o->samplerate = samplerate;
+  // check parameters are valid
+  if ((sint_t)hop_size < 1) {
+    AUBIO_ERR("tempo: got hop size %d, but can not be < 1\n", hop_size);
+    goto beach;
+  } else if ((sint_t)buf_size < 1) {
+    AUBIO_ERR("tempo: got window size %d, but can not be < 1\n", buf_size);
+    goto beach;
+  } else if (buf_size < hop_size) {
+    AUBIO_ERR("tempo: hop size (%d) is larger than window size (%d)\n", buf_size, hop_size);
+    goto beach;
+  } else if ((sint_t)samplerate < 1) {
+    AUBIO_ERR("tempo: samplerate (%d) can not be < 1\n", samplerate);
+    goto beach;
+  }
+
   /* length of observations, worth about 6 seconds */
   o->winlen = aubio_next_power_of_two(5.8 * samplerate / hop_size);
+  if (o->winlen < 4) o->winlen = 4;
   o->step = o->winlen/4;
   o->blockpos = 0;
   o->threshold = 0.3;
@@ -157,7 +201,12 @@ aubio_tempo_t * new_aubio_tempo (char_t * onset_mode,
   o->pv       = new_aubio_pvoc(buf_size, hop_size);
   o->pp       = new_aubio_peakpicker();
   aubio_peakpicker_set_threshold (o->pp, o->threshold);
-  o->od       = new_aubio_specdesc(onset_mode,buf_size);
+  if ( strcmp(tempo_mode, "default") == 0 ) {
+    strcpy(specdesc_func, "specflux");
+  } else {
+    strcpy(specdesc_func, tempo_mode);
+  }
+  o->od       = new_aubio_specdesc(specdesc_func,buf_size);
   o->of       = new_fvec(1);
   o->bt       = new_aubio_beattracking(o->winlen, o->hop_size, o->samplerate);
   o->onset    = new_fvec(1);
@@ -166,6 +215,10 @@ aubio_tempo_t * new_aubio_tempo (char_t * onset_mode,
     onset2 = new_fvec(1);
   }*/
   return o;
+
+beach:
+  AUBIO_FREE(o);
+  return NULL;
 }
 
 smpl_t aubio_tempo_get_bpm(aubio_tempo_t *o) {

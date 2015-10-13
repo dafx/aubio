@@ -18,8 +18,10 @@
 
 */
 
-#ifdef __APPLE__
 #include "config.h"
+
+#ifdef HAVE_SOURCE_APPLE_AUDIO
+
 #include "aubio_priv.h"
 #include "fvec.h"
 #include "fmat.h"
@@ -50,6 +52,7 @@ struct _aubio_source_apple_audio_t {
 extern int createAubioBufferList(AudioBufferList *bufferList, int channels, int max_source_samples);
 extern void freeAudioBufferList(AudioBufferList *bufferList);
 extern CFURLRef getURLFromPath(const char * path);
+char_t *getPrintableOSStatusError(char_t *str, OSStatus error);
 
 uint_t aubio_source_apple_audio_open (aubio_source_apple_audio_t *s, char_t * path);
 
@@ -57,8 +60,26 @@ aubio_source_apple_audio_t * new_aubio_source_apple_audio(char_t * path, uint_t 
 {
   aubio_source_apple_audio_t * s = AUBIO_NEW(aubio_source_apple_audio_t);
 
+  if (path == NULL) {
+    AUBIO_ERROR("source_apple_audio: Aborted opening null path\n");
+    goto beach;
+  }
+
+  if ( (sint_t)block_size <= 0 ) {
+    AUBIO_ERROR("source_apple_audio: Can not open %s with null or negative block_size %d\n",
+        path, block_size);
+    goto beach;
+  }
+
+  if ( (sint_t)samplerate < 0 ) {
+    AUBIO_ERROR("source_apple_audio: Can not open %s with negative samplerate %d\n",
+        path, samplerate);
+    goto beach;
+  }
+
   s->block_size = block_size;
   s->samplerate = samplerate;
+  s->path = path;
 
   if ( aubio_source_apple_audio_open ( s, path ) ) {
     goto beach;
@@ -79,7 +100,17 @@ uint_t aubio_source_apple_audio_open (aubio_source_apple_audio_t *s, char_t * pa
   // open the resource url
   CFURLRef fileURL = getURLFromPath(path);
   err = ExtAudioFileOpenURL(fileURL, &s->audioFile);
-  if (err) { AUBIO_ERR("error when trying to access %s, in ExtAudioFileOpenURL, %d\n", s->path, (int)err); goto beach;}
+  if (err == -43) {
+    AUBIO_ERR("source_apple_audio: Failed opening %s, "
+        "file not found, or no read access\n", s->path);
+    goto beach;
+  } else if (err) {
+    char_t errorstr[20];
+    AUBIO_ERR("source_apple_audio: Failed opening %s, "
+        "error in ExtAudioFileOpenURL (%s)\n", s->path,
+        getPrintableOSStatusError(errorstr, err));
+    goto beach;
+  }
 
   // create an empty AudioStreamBasicDescription
   AudioStreamBasicDescription fileFormat;
@@ -89,7 +120,13 @@ uint_t aubio_source_apple_audio_open (aubio_source_apple_audio_t *s, char_t * pa
   // fill it with the file description
   err = ExtAudioFileGetProperty(s->audioFile,
       kExtAudioFileProperty_FileDataFormat, &propSize, &fileFormat);
-  if (err) { AUBIO_ERROR("error in ExtAudioFileGetProperty, %d\n", (int)err); goto beach;}
+  if (err) {
+    char_t errorstr[20];
+    AUBIO_ERROR("source_apple_audio: Failed opening %s, "
+        "error in ExtAudioFileGetProperty (%s)\n", s->path,
+        getPrintableOSStatusError(errorstr, err));
+    goto beach;
+  }
 
   if (s->samplerate == 0) {
     s->samplerate = fileFormat.mSampleRate;
@@ -116,8 +153,11 @@ uint_t aubio_source_apple_audio_open (aubio_source_apple_audio_t *s, char_t * pa
   err = ExtAudioFileSetProperty(s->audioFile, kExtAudioFileProperty_ClientDataFormat,
       propSize, &clientFormat);
   if (err) {
-      AUBIO_ERROR("error in ExtAudioFileSetProperty, %d\n", (int)err);
-#if 1
+    char_t errorstr[20];
+    AUBIO_ERROR("source_apple_audio: Failed opening %s, "
+        "error in ExtAudioFileSetProperty (%s)\n", s->path,
+        getPrintableOSStatusError(errorstr, err));
+#if 0
   // print client and format descriptions
   AUBIO_DBG("Opened %s\n", s->path);
   AUBIO_DBG("file/client Format.mFormatID:        : %3c%c%c%c / %c%c%c%c\n",
@@ -157,7 +197,13 @@ beach:
 void aubio_source_apple_audio_do(aubio_source_apple_audio_t *s, fvec_t * read_to, uint_t * read) {
   UInt32 c, v, loadedPackets = s->block_size;
   OSStatus err = ExtAudioFileRead(s->audioFile, &loadedPackets, &s->bufferList);
-  if (err) { AUBIO_ERROR("error in ExtAudioFileRead %s %d\n", s->path, (int)err); goto beach;}
+  if (err) {
+    char_t errorstr[20];
+    AUBIO_ERROR("source_apple_audio: error while reading %s "
+        "with ExtAudioFileRead (%s)\n", s->path,
+        getPrintableOSStatusError(errorstr, err));
+    goto beach;
+  }
 
   short *data = (short*)s->bufferList.mBuffers[0].mData;
 
@@ -187,14 +233,20 @@ beach:
 void aubio_source_apple_audio_do_multi(aubio_source_apple_audio_t *s, fmat_t * read_to, uint_t * read) {
   UInt32 c, v, loadedPackets = s->block_size;
   OSStatus err = ExtAudioFileRead(s->audioFile, &loadedPackets, &s->bufferList);
-  if (err) { AUBIO_ERROR("source_apple_audio: error in ExtAudioFileRead, %d\n", (int)err); goto beach;}
+  if (err) {
+    char_t errorstr[20];
+    AUBIO_ERROR("source_apple_audio: error while reading %s "
+        "with ExtAudioFileRead (%s)\n", s->path,
+        getPrintableOSStatusError(errorstr, err));
+    goto beach;
+  }
 
   short *data = (short*)s->bufferList.mBuffers[0].mData;
 
   smpl_t **buf = read_to->data;
 
   for (v = 0; v < loadedPackets; v++) {
-    for (c = 0; c < s->channels; c++) {
+    for (c = 0; c < read_to->height; c++) {
       buf[c][v] = SHORT_TO_FLOAT(data[ v * s->channels + c]);
     }
   }
@@ -225,11 +277,17 @@ beach:
 uint_t aubio_source_apple_audio_close (aubio_source_apple_audio_t *s)
 {
   OSStatus err = noErr;
-  if (!s || !s->audioFile) { return 1; }
+  if (!s->audioFile) { return AUBIO_FAIL; }
   err = ExtAudioFileDispose(s->audioFile);
-  if (err) AUBIO_ERROR("error in ExtAudioFileDispose, %d\n", (int)err);
   s->audioFile = NULL;
-  return err;
+  if (err) {
+    char_t errorstr[20];
+    AUBIO_ERROR("source_apple_audio: error while closing %s "
+        "in ExtAudioFileDispose (%s)\n", s->path,
+        getPrintableOSStatusError(errorstr, err));
+    return err;
+  }
+  return AUBIO_OK;
 }
 
 void del_aubio_source_apple_audio(aubio_source_apple_audio_t * s){
@@ -240,14 +298,56 @@ void del_aubio_source_apple_audio(aubio_source_apple_audio_t * s){
 }
 
 uint_t aubio_source_apple_audio_seek (aubio_source_apple_audio_t * s, uint_t pos) {
-  // after a short read, the bufferList size needs to resetted to prepare for a full read
-  AudioBufferList *bufferList = &s->bufferList;
-  bufferList->mBuffers[0].mDataByteSize = s->block_size * s->channels * sizeof (short);
+  OSStatus err = noErr;
+  if ((sint_t)pos < 0) {
+    AUBIO_ERROR("source_apple_audio: error while seeking in %s "
+        "(can not seek at negative position %d)\n",
+        s->path, pos);
+    err = -1;
+    goto beach;
+  }
+  // check if we are not seeking out of the file
+  SInt64 fileLengthFrames = 0;
+  UInt32 propSize = sizeof(fileLengthFrames);
+  ExtAudioFileGetProperty(s->audioFile,
+      kExtAudioFileProperty_FileLengthFrames, &propSize, &fileLengthFrames);
   // compute position in the source file, before resampling
   smpl_t ratio = s->source_samplerate * 1. / s->samplerate;
   SInt64 resampled_pos = (SInt64)ROUND( pos * ratio );
-  OSStatus err = ExtAudioFileSeek(s->audioFile, resampled_pos);
-  if (err) AUBIO_ERROR("source_apple_audio: error in ExtAudioFileSeek (%d)\n", (int)err);
+  if (resampled_pos > fileLengthFrames) {
+    AUBIO_ERR("source_apple_audio: trying to seek in %s at pos %d, "
+        "but file has only %d frames\n",
+        s->path, pos, (uint_t)(fileLengthFrames / ratio));
+    err = -1;
+    goto beach;
+  }
+  // after a short read, the bufferList size needs to resetted to prepare for a full read
+  AudioBufferList *bufferList = &s->bufferList;
+  bufferList->mBuffers[0].mDataByteSize = s->block_size * s->channels * sizeof (short);
+  // do the actual seek
+  err = ExtAudioFileSeek(s->audioFile, resampled_pos);
+  if (err) {
+    char_t errorstr[20];
+    AUBIO_ERROR("source_apple_audio: error while seeking %s at %d "
+        "in ExtAudioFileSeek (%s)\n", s->path, pos,
+        getPrintableOSStatusError(errorstr, err));
+  }
+#if 0
+  // check position after seek
+  {
+    SInt64 outFrameOffset = 0;
+    err = ExtAudioFileTell(s->audioFile, &outFrameOffset);
+    if (err) {
+      char_t errorstr[20];
+      AUBIO_ERROR("source_apple_audio: error while seeking %s at %d "
+          "in ExtAudioFileTell (%s)\n", s->path, pos,
+          getPrintableOSStatusError(errorstr, err));
+    }
+    AUBIO_DBG("source_apple_audio: asked seek at %d, tell got %d\n",
+        pos, (uint_t)(outFrameOffset / ratio + .5));
+  }
+#endif
+beach:
   return err;
 }
 
@@ -259,4 +359,4 @@ uint_t aubio_source_apple_audio_get_channels(aubio_source_apple_audio_t * s) {
   return s->channels;
 }
 
-#endif /* __APPLE__ */
+#endif /* HAVE_SOURCE_APPLE_AUDIO */

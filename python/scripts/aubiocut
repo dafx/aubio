@@ -54,6 +54,13 @@ def parse_args():
             action="store_true", dest="cut", default=False,
             help="cut input sound file at detected labels \
                     best used with option -L")
+
+    # minioi
+    parser.add_option("-M","--minioi",
+            metavar = "<value>", type='string',
+            action="store", dest="minioi", default="12ms",
+            help="minimum inter onset interval [default=12ms]")
+
     """
     parser.add_option("-D","--delay",
             action = "store", dest = "delay", type = "float",
@@ -64,10 +71,6 @@ def parse_args():
             metavar = "<value>",
             action="store", dest="dcthreshold", default=1.,
             help="onset peak picking DC component [default=1.]")
-    parser.add_option("-M","--mintol",
-            metavar = "<value>",
-            action="store", dest="mintol", default=0.048,
-            help="minimum inter onset interval [default=0.048]")
     parser.add_option("-L","--localmin",
             action="store_true", dest="localmin", default=False,
             help="use local minima after peak detection")
@@ -106,6 +109,19 @@ def parse_args():
             action="store_true", dest="spectro", default=False,
             help="add spectrogram to the plot")
     """
+    parser.add_option("-o","--output", type = str,
+            metavar = "<outputdir>",
+            action="store", dest="output_directory", default=None,
+            help="specify path where slices of the original file should be created")
+    parser.add_option("--cut-until-nsamples", type = int,
+            metavar = "<samples>",
+            action = "store", dest = "cut_until_nsamples", default = None,
+            help="how many extra samples should be added at the end of each slice")
+    parser.add_option("--cut-until-nslices", type = int,
+            metavar = "<slices>",
+            action = "store", dest = "cut_until_nslices", default = None,
+            help="how many extra slices should be added at the end of each slice")
+
     parser.add_option("-v","--verbose",
             action="store_true", dest="verbose", default=True,
             help="make lots of noise [default]")
@@ -139,6 +155,13 @@ if __name__ == '__main__':
         o = tempo(options.onset_method, bufsize, hopsize)
     else:
         o = onset(options.onset_method, bufsize, hopsize)
+        if options.minioi:
+            if options.minioi.endswith('ms'):
+                o.set_minioi_ms(int(options.minioi[:-2]))
+            elif options.minioi.endswith('s'):
+                o.set_minioi_s(int(options.minioi[:-1]))
+            else:
+                o.set_minioi(int(options.minioi))
     o.set_threshold(options.threshold)
 
     timestamps = []
@@ -161,40 +184,20 @@ if __name__ == '__main__':
 
     # cutting pass
     if options.cut and nstamps > 0:
-        # generate output filenames
-        import os
-        source_base_name, source_ext = os.path.splitext(os.path.basename(source_file))
-        def new_sink_name(source_base_name, timestamp):
-            return source_base_name + '_%02.3f' % (timestamp) + '.wav'
-        # reopen source file
-        s = source(source_file, samplerate, hopsize)
-        if samplerate == 0: samplerate = s.get_samplerate()
-        # create first sink at 0
-        g = sink(new_sink_name(source_base_name, 0.), samplerate)
-        total_frames = 0
-        # get next region
-        next_onset = int(timestamps.pop(0))
-        while True:
-            vec, read = s()
-            remaining = next_onset - total_frames
-            if remaining <= read:
-                # write remaining samples from current region
-                g(vec[0:remaining], remaining)
-                # close this file
-                del g
-                # create a new file for the new region
-                g = sink(new_sink_name(source_base_name, next_onset / float(samplerate)), samplerate)
-                # write the remaining samples in the new file
-                g(vec[remaining:read], read - remaining)
-                #print "new slice", total_frames_written, "+", remaining, "=", start_of_next_region
-                if len(timestamps):
-                    next_onset = int(timestamps.pop(0))
-                else:
-                    next_onset = 1e120
-            else:
-                g(vec[0:read], read)
-            total_frames += read
-            if read < hopsize: break
+        # generate output files
+        from aubio.slicing import slice_source_at_stamps
+        timestamps_end = None
+        if options.cut_until_nslices and options.cut_until_nsamples:
+            print "warning: using cut_until_nslices, but cut_until_nsamples is set"
+        if options.cut_until_nsamples:
+            timestamps_end = [t + options.cut_until_nsamples for t in timestamps[1:]]
+            timestamps_end += [ 1e120 ]
+        if options.cut_until_nslices:
+            timestamps_end = [t for t in timestamps[1 + options.cut_until_nslices:]]
+            timestamps_end += [ 1e120 ] * (options.cut_until_nslices + 1)
+        slice_source_at_stamps(source_file, timestamps, timestamps_end = timestamps_end,
+                output_dir = options.output_directory,
+                samplerate = samplerate)
 
         # print some info
         duration = float (total_frames) / float(samplerate)

@@ -18,7 +18,7 @@
 
 */
 
-/* This algorithm was developped by A. de Cheveigné and H. Kawahara and
+/* This algorithm was developed by A. de Cheveigné and H. Kawahara and
  * published in:
  * 
  * de Cheveigné, A., Kawahara, H. (2002) "YIN, a fundamental frequency
@@ -145,7 +145,11 @@ aubio_pitchyin_do (aubio_pitchyin_t * o, fvec_t * input, fvec_t * out)
       yin->data[tau] += SQR (tmp);
     }
     tmp2 += yin->data[tau];
-    yin->data[tau] *= tau / tmp2;
+    if (tmp2 != 0) {
+      yin->data[tau] *= tau / tmp2;
+    } else {
+      yin->data[tau] = 1.;
+    }
     period = tau - 3;
     if (tau > 4 && (yin->data[period] < tol) &&
         (yin->data[period] < yin->data[period + 1])) {

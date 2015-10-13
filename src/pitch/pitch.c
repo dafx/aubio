@@ -129,6 +129,22 @@ new_aubio_pitch (char_t * pitch_mode,
         pitch_mode);
     pitch_type = aubio_pitcht_default;
   }
+
+  // check parameters are valid
+  if ((sint_t)hopsize < 1) {
+    AUBIO_ERR("onset: got hopsize %d, but can not be < 1\n", hopsize);
+    goto beach;
+  } else if ((sint_t)bufsize < 1) {
+    AUBIO_ERR("onset: got buffer_size %d, but can not be < 1\n", bufsize);
+    goto beach;
+  } else if (bufsize < hopsize) {
+    AUBIO_ERR("onset: hop size (%d) is larger than win size (%d)\n", bufsize, hopsize);
+    goto beach;
+  } else if ((sint_t)samplerate < 1) {
+    AUBIO_ERR("onset: samplerate (%d) can not be < 1\n", samplerate);
+    goto beach;
+  }
+
   p->samplerate = samplerate;
   p->type = pitch_type;
   aubio_pitch_set_unit (p, "default");
@@ -178,6 +194,10 @@ new_aubio_pitch (char_t * pitch_mode,
       break;
   }
   return p;
+
+beach:
+  AUBIO_FREE(p);
+  return NULL;
 }
 
 void
@@ -237,6 +257,8 @@ aubio_pitch_set_unit (aubio_pitch_t * p, char_t * pitch_unit)
   if (strcmp (pitch_unit, "freq") == 0)
     pitch_mode = aubio_pitchm_freq;
   else if (strcmp (pitch_unit, "hertz") == 0)
+    pitch_mode = aubio_pitchm_freq;
+  else if (strcmp (pitch_unit, "Hertz") == 0)
     pitch_mode = aubio_pitchm_freq;
   else if (strcmp (pitch_unit, "Hz") == 0)
     pitch_mode = aubio_pitchm_freq;
@@ -366,10 +388,11 @@ aubio_pitch_do_yinfft (aubio_pitch_t * p, fvec_t * ibuf, fvec_t * obuf)
 void
 aubio_pitch_do_specacf (aubio_pitch_t * p, fvec_t * ibuf, fvec_t * out)
 {
+  smpl_t pitch = 0., period;
   aubio_pitch_slideblock (p, ibuf);
   aubio_pitchspecacf_do (p->p_object, p->buf, out);
   //out->data[0] = aubio_bintofreq (out->data[0], p->samplerate, p->bufsize);
-  smpl_t pitch = 0., period = out->data[0];
+  period = out->data[0];
   if (period > 0) {
     pitch = p->samplerate / period;
   } else {

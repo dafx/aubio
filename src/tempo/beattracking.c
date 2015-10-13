@@ -61,8 +61,6 @@ new_aubio_beattracking (uint_t winlen, uint_t hop_size, uint_t samplerate)
 
   aubio_beattracking_t *p = AUBIO_NEW (aubio_beattracking_t);
   uint_t i = 0;
-  p->hop_size = hop_size;
-  p->samplerate = samplerate;
   /* default value for rayleigh weighting - sets preferred tempo to 120bpm */
   smpl_t rayparam = 60. * samplerate / 120. / hop_size;
   smpl_t dfwvnorm = EXP ((LOG (2.0) / rayparam) * (winlen + 2));
@@ -72,6 +70,8 @@ new_aubio_beattracking (uint_t winlen, uint_t hop_size, uint_t samplerate)
    * 1 onset frame [128] */
   uint_t step = winlen / 4;     /* 1.5 seconds */
 
+  p->hop_size = hop_size;
+  p->samplerate = samplerate;
   p->lastbeat = 0;
   p->counter = 0;
   p->flagstep = 0;
@@ -266,6 +266,7 @@ fvec_gettimesig (fvec_t * acf, uint_t acflen, uint_t gp)
 {
   sint_t k = 0;
   smpl_t three_energy = 0., four_energy = 0.;
+  if (gp < 2) return 4;
   if (acflen > 6 * gp + 2) {
     for (k = -2; k < 2; k++) {
       three_energy += acf->data[3 * gp + k];
@@ -330,7 +331,7 @@ aubio_beattracking_checkstate (aubio_beattracking_t * bt)
   //i.e. 3rd frame after flagstep initially set
   if (counter == 1 && flagstep == 1) {
     //check for consistency between previous beatperiod values
-    if (ABS (2. * rp - rp1 - rp2) < bt->g_var) {
+    if (ABS (2 * rp - rp1 - rp2) < bt->g_var) {
       //if true, can activate context dependent model
       flagconst = 1;
       counter = 0;              // reset counter and flagstep
@@ -421,8 +422,10 @@ smpl_t
 aubio_beattracking_get_confidence (aubio_beattracking_t * bt)
 {
   if (bt->gp) {
-    return fvec_max (bt->acfout) / fvec_sum(bt->acfout);
-  } else {
-    return 0.;
+    smpl_t acf_sum = fvec_sum(bt->acfout);
+    if (acf_sum != 0.) {
+      return fvec_quadratic_peak_mag (bt->acfout, bt->gp) / acf_sum;
+    }
   }
+  return 0.;
 }

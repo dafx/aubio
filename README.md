@@ -26,21 +26,33 @@ aubio provide several algorithms and routines, including:
 The name aubio comes from _audio_ with a typo: some errors are likely to be
 found in the results.
 
+Python module
+-------------
+
+A python module to access the library functions is also provided. Please see
+the file `python/README` for more information on how to use it.
+
+Examples tools
+--------------
+
+A few simple command line tools are included along with the library:
+
+ - `aubioonset` outputs the time stamp of detected note onsets
+ - `aubiopitch` attempts to identify a fundamental frequency, or pitch, for
+   each frame of the input sound
+ - `aubiomfcc` computes Mel-frequency Cepstrum Coefficients
+ - `aubiotrack` outputs the time stamp of detected beats
+ - `aubionotes` emits midi-like notes, with an onset, a pitch, and a duration
+ - `aubioquiet` extracts quiet and loud regions
+
+Additionally, the python module comes with the following script:
+
+ - `aubiocut` slices sound files at onset or beat timestamps
 
 Implementation and Design Basics
 --------------------------------
 
-The library is written in C and is optimised for speed and portability. A
-python module to access the library functions is also provided. A few simple
-applications are included along with the library:
-
- - `aubioonset` outputs the time stamp of detected note onsets
- - `aubiotempo` does the same for the tempo
- - `aubionotes` emits midi-like notes, with an onset, a pitch, and a duration
- - `aubiocut` slices an input sound and cuts it in several smaller files, sliced
-   at each detected onset or beat
- - `aubiopitch` attempts to identify a fundamental frequency, or pitch, for each
-   frame of the input sound
+The library is written in C and is optimised for speed and portability.
 
 The C API is designed in the following way:
 
@@ -54,6 +66,9 @@ For performance and real-time operation, no memory allocation or freeing take
 place in the `_do` methods. Instead, memory allocation should always take place
 in the `new_` methods, whereas free operations are done in the `del_` methods.
 
+The latest version of the documentation can be found at:
+
+  http://aubio.org/documentation
 
 Installation and Build Instructions
 -----------------------------------
@@ -62,15 +77,17 @@ A number of distributions already include aubio. Check your favorite package
 management system, or have a look at the [download
 page](http://aubio.org/download).
 
-aubio uses [waf](https://code.google.com/p/waf/) to configure, compile, and
-test the source:
+aubio uses [waf](https://waf.io/) to configure, compile, and test the source:
 
     ./waf configure
     ./waf build
     sudo ./waf install
 
-aubio compiles on Linux, Mac OS X, Cygwin, and iPhone.
+If waf is not found in the directory, you can download and install it with:
 
+    make getwaf
+
+aubio compiles on Linux, Mac OS X, Cygwin, and iOS.
 
 Credits and Publications
 ------------------------

@@ -16,14 +16,14 @@ int main (int argc, char **argv)
     PRINT_MSG("examples:\n");
     PRINT_MSG(" - read file.wav at original samplerate\n");
     PRINT_MSG("       %s file.wav\n", argv[0]);
-    PRINT_MSG(" - read file.wav at 32000Hz\n");
+    PRINT_MSG(" - read file.aif at 32000Hz\n");
     PRINT_MSG("       %s file.aif 32000\n", argv[0]);
-    PRINT_MSG(" - read file.wav at original samplerate with 4096 blocks\n");
-    PRINT_MSG("       %s file.wav 0 4096 \n", argv[0]);
+    PRINT_MSG(" - read file.mp3 at original samplerate with 4096 blocks\n");
+    PRINT_MSG("       %s file.mp3 0 4096 \n", argv[0]);
     return err;
   }
 
-#if __APPLE__
+#if HAVE_SOURCE_APPLE_AUDIO
   uint_t samplerate = 0;
   uint_t hop_size = 256;
   uint_t n_frames = 0, read = 0;
@@ -38,7 +38,7 @@ int main (int argc, char **argv)
   if (!s) { err = 1; goto beach; }
   fvec_t *vec = new_fvec(hop_size);
 
-  if (samplerate == 0 ) samplerate = aubio_source_apple_audio_get_samplerate(s);
+  samplerate = aubio_source_apple_audio_get_samplerate(s);
 
   do {
     aubio_source_apple_audio_do(s, vec, &read);
@@ -52,9 +52,9 @@ int main (int argc, char **argv)
   del_fvec (vec);
   del_aubio_source_apple_audio (s);
 beach:
-#else
+#else /* HAVE_SOURCE_APPLE_AUDIO */
   err = 3;
   PRINT_ERR("aubio was not compiled with aubio_source_apple_audio\n");
-#endif /* __APPLE__ */
-  return 0;
+#endif /* HAVE_SOURCE_APPLE_AUDIO */
+  return err;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2009 Paul Brossier <piem@aubio.org>
+  Copyright (C) 2003-2014 Paul Brossier <piem@aubio.org>
 
   This file is part of aubio.
 
@@ -30,26 +30,28 @@ struct _aubio_pvoc_t {
   uint_t win_s;       /** grain length */
   uint_t hop_s;       /** overlap step */
   aubio_fft_t * fft;  /** fft object */
-  fvec_t * synth;     /** cur output grain [win_s] */
-  fvec_t * synthold;  /** last input frame [win_s-hop_s] */
-  fvec_t * data;      /** current input grain [win_s] */
-  fvec_t * dataold;   /** last input frame [win_s-hop_s] */
+  fvec_t * data;      /** current input grain, [win_s] frames */
+  fvec_t * dataold;   /** memory of past grain, [win_s-hop_s] frames */
+  fvec_t * synth;     /** current output grain, [win_s] frames */
+  fvec_t * synthold;  /** memory of past grain, [win_s-hop_s] frames */
   fvec_t * w;         /** grain window [win_s] */
+  uint_t start;       /** where to start additive synthesis */
+  uint_t end;         /** where to end it */
+  smpl_t scale;       /** scaling factor for synthesis */
+  uint_t end_datasize;  /** size of memory to end */
+  uint_t hop_datasize;  /** size of memory to hop_s */
 };
 
 
 /** returns data and dataold slided by hop_s */
-static void aubio_pvoc_swapbuffers(smpl_t * data, smpl_t * dataold, const
-    smpl_t * datanew, uint_t win_s, uint_t hop_s);
+static void aubio_pvoc_swapbuffers(aubio_pvoc_t *pv, fvec_t *new);
 
 /** do additive synthesis from 'old' and 'cur' */
-static void aubio_pvoc_addsynth(const smpl_t * synth, smpl_t * synthold,
-    smpl_t * synthnew, uint_t win_s, uint_t hop_s);
+static void aubio_pvoc_addsynth(aubio_pvoc_t *pv, fvec_t * synthnew);
 
 void aubio_pvoc_do(aubio_pvoc_t *pv, fvec_t * datanew, cvec_t *fftgrain) {
   /* slide  */
-  aubio_pvoc_swapbuffers(pv->data->data,pv->dataold->data,
-      datanew->data,pv->win_s,pv->hop_s);
+  aubio_pvoc_swapbuffers(pv, datanew);
   /* windowing */
   fvec_weight(pv->data, pv->w);
   /* shift */
@@ -63,8 +65,8 @@ void aubio_pvoc_rdo(aubio_pvoc_t *pv,cvec_t * fftgrain, fvec_t * synthnew) {
   aubio_fft_rdo(pv->fft,fftgrain,pv->synth);
   /* unshift */
   fvec_shift(pv->synth);
-  aubio_pvoc_addsynth(pv->synth->data,pv->synthold->data,
-      synthnew->data,pv->win_s,pv->hop_s);
+  /* additive synthesis */
+  aubio_pvoc_addsynth(pv, synthnew);
 }
 
 aubio_pvoc_t * new_aubio_pvoc (uint_t win_s, uint_t hop_s) {
@@ -74,14 +76,14 @@ aubio_pvoc_t * new_aubio_pvoc (uint_t win_s, uint_t hop_s) {
     AUBIO_WRN("Hop size bigger than half the window size!\n");
   } */
 
-  if (hop_s < 1) {
-    AUBIO_ERR("got hop_size %d, but can not be < 1\n", hop_s);
+  if ((sint_t)hop_s < 1) {
+    AUBIO_ERR("pvoc: got hop_size %d, but can not be < 1\n", hop_s);
     goto beach;
-  } else if (win_s < 1) {
-    AUBIO_ERR("got buffer_size %d, but can not be < 2\n", win_s);
+  } else if ((sint_t)win_s < 1) {
+    AUBIO_ERR("pvoc: got buffer_size %d, but can not be < 1\n", win_s);
     goto beach;
-  } else if (win_s < hop_s + 1) {
-    AUBIO_ERR("hop size (%d) is larger than or equal to win size (%d)\n", win_s, hop_s);
+  } else if (win_s < hop_s) {
+    AUBIO_ERR("pvoc: hop size (%d) is larger than win size (%d)\n", win_s, hop_s);
     goto beach;
   }
 
@@ -92,12 +94,30 @@ aubio_pvoc_t * new_aubio_pvoc (uint_t win_s, uint_t hop_s) {
   pv->synth    = new_fvec (win_s);
 
   /* new input output */
-  pv->dataold  = new_fvec  (win_s-hop_s);
-  pv->synthold = new_fvec (win_s-hop_s);
+  if (win_s > hop_s) {
+    pv->dataold  = new_fvec  (win_s-hop_s);
+    pv->synthold = new_fvec (win_s-hop_s);
+  } else {
+    pv->dataold  = new_fvec  (1);
+    pv->synthold = new_fvec (1);
+  }
   pv->w        = new_aubio_window ("hanningz", win_s);
 
   pv->hop_s    = hop_s;
   pv->win_s    = win_s;
+
+  /* more than 50% overlap, overlap anyway */
+  if (win_s < 2 * hop_s) pv->start = 0;
+  /* less than 50% overlap, reset latest grain trail */
+  else pv->start = win_s - hop_s - hop_s;
+
+  if (win_s > hop_s) pv->end = win_s - hop_s;
+  else pv->end = 0;
+
+  pv->end_datasize = pv->end * sizeof(smpl_t);
+  pv->hop_datasize = pv->hop_s * sizeof(smpl_t);
+
+  pv->scale = pv->hop_s * 2. / pv->win_s;
 
   return pv;
 
@@ -116,34 +136,58 @@ void del_aubio_pvoc(aubio_pvoc_t *pv) {
   AUBIO_FREE(pv);
 }
 
-static void aubio_pvoc_swapbuffers(smpl_t * data, smpl_t * dataold, 
-    const smpl_t * datanew, uint_t win_s, uint_t hop_s)
+static void aubio_pvoc_swapbuffers(aubio_pvoc_t *pv, fvec_t *new)
 {
+  /* some convenience pointers */
+  smpl_t * data = pv->data->data;
+  smpl_t * dataold = pv->dataold->data;
+  smpl_t * datanew = new->data;
+#if !HAVE_MEMCPY_HACKS
   uint_t i;
-  for (i = 0; i < win_s - hop_s; i++)
+  for (i = 0; i < pv->end; i++)
     data[i] = dataold[i];
-  for (i = 0; i < hop_s; i++)
-    data[win_s - hop_s + i] = datanew[i];
-  for (i = 0; i < win_s - hop_s; i++)
-    dataold[i] = data[i + hop_s];
+  for (i = 0; i < pv->hop_s; i++)
+    data[pv->end + i] = datanew[i];
+  for (i = 0; i < pv->end; i++)
+    dataold[i] = data[i + pv->hop_s];
+#else
+  memcpy(data, dataold, pv->end_datasize);
+  data += pv->end;
+  memcpy(data, datanew, pv->hop_datasize);
+  data -= pv->end;
+  data += pv->hop_s;
+  memcpy(dataold, data, pv->end_datasize);
+#endif
 }
 
-static void aubio_pvoc_addsynth(const smpl_t * synth, smpl_t * synthold, 
-                smpl_t * synthnew, uint_t win_s, uint_t hop_s)
+static void aubio_pvoc_addsynth(aubio_pvoc_t *pv, fvec_t *synth_new)
 {
   uint_t i;
-  smpl_t scale = 2 * hop_s / (win_s + .0);
-  /* add new synth to old one and put result in synthnew */
-  for (i = 0; i < hop_s; i++)
-    synthnew[i] = synthold[i] + synth[i] * scale;
-  /* shift synthold */
-  for (i = 0; i < win_s - 2 * hop_s; i++)
-    synthold[i] = synthold[i + hop_s];
-  /* erase last frame in synthold */
-  for (i = win_s - hop_s; i < win_s; i++)
-    synthold[i - hop_s] = 0.;
-  /* additive synth */
-  for (i = 0; i < win_s - hop_s; i++)
-    synthold[i] += synth[i + hop_s] * scale;
-}
+  /* some convenience pointers */
+  smpl_t * synth    = pv->synth->data;
+  smpl_t * synthold = pv->synthold->data;
+  smpl_t * synthnew = synth_new->data;
 
+  /* put new result in synthnew */
+  for (i = 0; i < pv->hop_s; i++)
+    synthnew[i] = synth[i] * pv->scale;
+
+  /* no overlap, nothing else to do */
+  if (pv->end == 0) return;
+
+  /* add new synth to old one */
+  for (i = 0; i < pv->hop_s; i++)
+    synthnew[i] += synthold[i];
+
+  /* shift synthold */
+  for (i = 0; i < pv->start; i++)
+    synthold[i] = synthold[i + pv->hop_s];
+
+  /* erase last frame in synthold */
+  for (i = pv->start; i < pv->end; i++)
+    synthold[i] = 0.;
+
+  /* additive synth */
+  for (i = 0; i < pv->end; i++)
+    synthold[i] += synth[i + pv->hop_s] * pv->scale;
+}

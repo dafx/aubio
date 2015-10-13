@@ -1,6 +1,6 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 import sys
 import os.path
@@ -46,6 +46,7 @@ aubio_extension = Extension("aubio._aubio", [
     "ext/aubiomodule.c",
     "ext/aubioproxy.c",
     "ext/ufuncs.c",
+    "ext/py-musicutils.c",
     "ext/py-cvec.c",
     # example without macro
     "ext/py-filter.c",
@@ -54,6 +55,7 @@ aubio_extension = Extension("aubio._aubio", [
     "ext/py-fft.c",
     "ext/py-phasevoc.c",
     "ext/py-source.c",
+    "ext/py-sink.c",
     # generated files
     ] + generated_object_files,
     include_dirs = include_dirs,
@@ -93,4 +95,5 @@ distrib = setup(name='aubio',
     url = 'http://aubio.org/',
     platforms = 'any',
     classifiers = classifiers,
+    install_requires = ['numpy'],
     )
