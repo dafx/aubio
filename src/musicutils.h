@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003-2013 Paul Brossier <piem@aubio.org>
+  Copyright (C) 2003-2015 Paul Brossier <piem@aubio.org>
 
   This file is part of aubio.
 
@@ -29,11 +29,11 @@
 extern "C" {
 #endif
 
-/** create window 
+/** create window
 
   \param window_type type of the window to create
   \param size length of the window to create (see fvec_set_window())
- 
+
 */
 fvec_t *new_aubio_window (char_t * window_type, uint_t size);
 
@@ -49,15 +49,15 @@ fvec_t *new_aubio_window (char_t * window_type, uint_t size);
   "default" is equivalent to "hanningz".
 
   References:
-    
+
     - <a href="http://en.wikipedia.org/wiki/Window_function">Window
 function</a> on Wikipedia
     - Amalia de Götzen, Nicolas Bernardini, and Daniel Arfib. Traditional (?)
 implementations of a phase vocoder: the tricks of the trade. In Proceedings of
 the International Conference on Digital Audio Effects (DAFx-00), pages 37–44,
 Uni- versity of Verona, Italy, 2000.
-  (<a href="http://profs.sci.univr.it/%7Edafx/Final-Papers/ps/Bernardini.ps.gz">
-  ps.gz</a>)
+  (<a href="http://www.cs.princeton.edu/courses/archive/spr09/cos325/Bernardini.pdf">
+  pdf</a>)
 
  */
 uint_t fvec_set_window (fvec_t * window, char_t * window_type);
@@ -68,7 +68,7 @@ uint_t fvec_set_window (fvec_t * window, char_t * window_type);
 range \f$ [-\pi, \pi] \f$.
 
   \param phase unwrapped phase to map to the unit circle
-  
+
   \return equivalent phase wrapped to the unit circle
 
 */
@@ -93,7 +93,7 @@ smpl_t aubio_freqtomidi (smpl_t freq);
 smpl_t aubio_miditofreq (smpl_t midi);
 
 /** clean up cached memory at the end of program
- 
+
   This function should be used at the end of programs to purge all cached
   memory. So far it is only useful to clean FFTW's cache.
 
@@ -112,11 +112,11 @@ void aubio_cleanup (void);
 */
 smpl_t aubio_zero_crossing_rate (fvec_t * v);
 
-/** compute sound level on a linear
+/** compute sound level on a linear scale
 
   This gives the average of the square amplitudes.
 
-  \param v vector to compute dB SPL from
+  \param v vector to compute level from
 
   \return level of v
 
@@ -137,7 +137,7 @@ smpl_t aubio_level_lin (fvec_t * v);
 smpl_t aubio_db_spl (fvec_t * v);
 
 /** check if buffer level in dB SPL is under a given threshold
- 
+
   \param v vector to get level from
   \param threshold threshold in dB SPL
 

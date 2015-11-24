@@ -135,8 +135,8 @@ aubio_beattracking_do (aubio_beattracking_t * bt, fvec_t * dfframe,
   //number of harmonics in shift invariant comb filterbank
   uint_t numelem = 4;
 
-  smpl_t phase;                 // beat alignment (step - lastbeat) 
-  smpl_t beat;                  // beat position 
+  smpl_t phase;                 // beat alignment (step - lastbeat)
+  smpl_t beat;                  // beat position
   smpl_t bp;                    // beat period
   uint_t a, b;                  // used to build shift invariant comb filterbank
   uint_t kmax;                  // number of elements used to find beat phase
@@ -226,7 +226,7 @@ aubio_beattracking_do (aubio_beattracking_t * bt, fvec_t * dfframe,
   i = 1;
   beat = bp - phase;
 
-  // AUBIO_DBG ("bp: %f, phase: %f, lastbeat: %f, step: %d, winlen: %d\n", 
+  // AUBIO_DBG ("bp: %f, phase: %f, lastbeat: %f, step: %d, winlen: %d\n",
   //    bp, phase, bt->lastbeat, step, winlen);
 
   /* the next beat will be earlier than 60% of the tempo period
@@ -318,7 +318,7 @@ aubio_beattracking_checkstate (aubio_beattracking_t * bt)
     gp = 0;
   }
 
-  //now look for step change - i.e. a difference between gp and rp that 
+  //now look for step change - i.e. a difference between gp and rp that
   // is greater than 2*constthresh - always true in first case, since gp = 0
   if (counter == 0) {
     if (ABS (gp - rp) > 2. * bt->g_var) {
@@ -341,7 +341,7 @@ aubio_beattracking_checkstate (aubio_beattracking_t * bt)
       counter = 2;              // let it look next time
     }
   } else if (counter > 0) {
-    //if counter doesn't = 1, 
+    //if counter doesn't = 1,
     counter = counter - 1;
   }
 
@@ -409,10 +409,22 @@ aubio_beattracking_checkstate (aubio_beattracking_t * bt)
 }
 
 smpl_t
+aubio_beattracking_get_period (aubio_beattracking_t * bt)
+{
+  return bt->hop_size * bt->bp;
+}
+
+smpl_t
+aubio_beattracking_get_period_s (aubio_beattracking_t * bt)
+{
+  return aubio_beattracking_get_period(bt) / (smpl_t) bt->samplerate;
+}
+
+smpl_t
 aubio_beattracking_get_bpm (aubio_beattracking_t * bt)
 {
   if (bt->bp != 0) {
-    return 60. * bt->samplerate/ bt->bp / bt->hop_size;
+    return 60. / aubio_beattracking_get_period_s(bt);
   } else {
     return 0.;
   }

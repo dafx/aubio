@@ -75,6 +75,15 @@ def options(ctx):
     add_option_enable_disable(ctx, 'fat', default = False,
             help_str = 'build fat binaries (darwin only)',
             help_disable_str = 'do not build fat binaries (default)')
+    add_option_enable_disable(ctx, 'accelerate', default = None,
+            help_str = 'use Accelerate framework (darwin only) (auto)',
+            help_disable_str = 'do not use Accelerate framework')
+    add_option_enable_disable(ctx, 'apple-audio', default = None,
+            help_str = 'use CoreFoundation (darwin only) (auto)',
+            help_disable_str = 'do not use CoreFoundation framework')
+    add_option_enable_disable(ctx, 'atlas', default = None,
+            help_str = 'use Atlas library (auto)',
+            help_disable_str = 'do not use Atlas library')
 
     ctx.add_option('--with-target-platform', type='string',
             help='set target platform for cross-compilation', dest='target_platform')
@@ -110,15 +119,20 @@ def configure(ctx):
         ctx.env.LINKFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
 
     if target_platform in [ 'darwin', 'ios', 'iosimulator']:
-        ctx.env.FRAMEWORK = ['CoreFoundation', 'AudioToolbox', 'Accelerate']
-        ctx.define('HAVE_SOURCE_APPLE_AUDIO', 1)
-        ctx.define('HAVE_SINK_APPLE_AUDIO', 1)
-        ctx.define('HAVE_ACCELERATE', 1)
+        if (ctx.options.enable_apple_audio != False):
+            ctx.env.FRAMEWORK += ['CoreFoundation', 'AudioToolbox']
+            ctx.define('HAVE_SOURCE_APPLE_AUDIO', 1)
+            ctx.define('HAVE_SINK_APPLE_AUDIO', 1)
+        if (ctx.options.enable_accelerate != False):
+            ctx.define('HAVE_ACCELERATE', 1)
+            ctx.env.FRAMEWORK += ['Accelerate']
 
     if target_platform in [ 'ios', 'iosimulator' ]:
-        ctx.define('TARGET_OS_IPHONE', 1)
         MINSDKVER="6.1"
         ctx.env.CFLAGS += ['-std=c99']
+        if (ctx.options.enable_apple_audio != False):
+            ctx.define('HAVE_AUDIO_UNIT', 1)
+            #ctx.env.FRAMEWORK += ['CoreFoundation', 'AudioToolbox']
         if target_platform == 'ios':
             DEVROOT = "/Applications/Xcode.app/Contents"
             DEVROOT += "/Developer/Platforms/iPhoneOS.platform/Developer"
@@ -178,17 +192,22 @@ def configure(ctx):
         # one of fftwf or fftw3f
         if (ctx.options.enable_fftw3f != False):
             ctx.check_cfg(package = 'fftw3f', atleast_version = '3.0.0',
-                    args = '--cflags --libs', mandatory = False)
+                    args = '--cflags --libs',
+                    mandatory = ctx.options.enable_fftw3f)
             if (ctx.options.enable_double == True):
-                ctx.msg('Warning', 'fftw3f enabled, but compiling in double precision!')
+                ctx.msg('Warning',
+                        'fftw3f enabled, but compiling in double precision!')
         else:
-            # fftw3f not enabled, take most sensible one according to enable_double
+            # fftw3f disabled, take most sensible one according to
+            # enable_double
             if (ctx.options.enable_double == True):
                 ctx.check_cfg(package = 'fftw3', atleast_version = '3.0.0',
-                        args = '--cflags --libs', mandatory = False)
+                        args = '--cflags --libs', mandatory =
+                        ctx.options.enable_fftw3)
             else:
                 ctx.check_cfg(package = 'fftw3f', atleast_version = '3.0.0',
-                        args = '--cflags --libs', mandatory = False)
+                        args = '--cflags --libs',
+                        mandatory = ctx.options.enable_fftw3)
         ctx.define('HAVE_FFTW3', 1)
 
     # fftw not enabled, use vDSP or ooura
@@ -204,29 +223,36 @@ def configure(ctx):
     # check for libsndfile
     if (ctx.options.enable_sndfile != False):
         ctx.check_cfg(package = 'sndfile', atleast_version = '1.0.4',
-                args = '--cflags --libs', mandatory = False)
+                args = '--cflags --libs',
+                mandatory = ctx.options.enable_sndfile)
 
     # check for libsamplerate
     if (ctx.options.enable_samplerate != False):
         ctx.check_cfg(package = 'samplerate', atleast_version = '0.0.15',
-                args = '--cflags --libs', mandatory = False)
+                args = '--cflags --libs',
+                mandatory = ctx.options.enable_samplerate)
 
     # check for jack
     if (ctx.options.enable_jack != False):
         ctx.check_cfg(package = 'jack',
-                args = '--cflags --libs', mandatory = False)
+                args = '--cflags --libs',
+                mandatory = ctx.options.enable_jack)
 
     # check for libav
     if (ctx.options.enable_avcodec != False):
         ctx.check_cfg(package = 'libavcodec', atleast_version = '54.35.0',
-                args = '--cflags --libs', uselib_store = 'AVCODEC', mandatory = False)
+                args = '--cflags --libs', uselib_store = 'AVCODEC',
+                mandatory = ctx.options.enable_avcodec)
         ctx.check_cfg(package = 'libavformat', atleast_version = '52.3.0',
-                args = '--cflags --libs', uselib_store = 'AVFORMAT', mandatory = False)
+                args = '--cflags --libs', uselib_store = 'AVFORMAT',
+                mandatory = ctx.options.enable_avcodec)
         ctx.check_cfg(package = 'libavutil', atleast_version = '52.3.0',
-                args = '--cflags --libs', uselib_store = 'AVUTIL', mandatory = False)
+                args = '--cflags --libs', uselib_store = 'AVUTIL',
+                mandatory = ctx.options.enable_avcodec)
         ctx.check_cfg(package = 'libavresample', atleast_version = '1.0.1',
-                args = '--cflags --libs', uselib_store = 'AVRESAMPLE', mandatory = False)
-        if all ( 'HAVE_' + i in ctx.env.define_key
+                args = '--cflags --libs', uselib_store = 'AVRESAMPLE',
+                mandatory = ctx.options.enable_avcodec)
+        if all ( 'HAVE_' + i in ctx.env
                 for i in ['AVCODEC', 'AVFORMAT', 'AVUTIL', 'AVRESAMPLE'] ):
             ctx.define('HAVE_LIBAV', 1)
             ctx.msg('Checking for all libav libraries', 'yes')
@@ -235,6 +261,12 @@ def configure(ctx):
 
     ctx.define('HAVE_WAVREAD', 1)
     ctx.define('HAVE_WAVWRITE', 1)
+
+    # use ATLAS
+    if (ctx.options.enable_atlas != False):
+        ctx.check(header_name = 'atlas/cblas.h', mandatory = ctx.options.enable_atlas)
+        #ctx.check(lib = 'lapack', uselib_store = 'LAPACK', mandatory = ctx.options.enable_atlas)
+        ctx.check(lib = 'cblas', uselib_store = 'BLAS', mandatory = ctx.options.enable_atlas)
 
     # use memcpy hacks
     if (ctx.options.enable_memcpy == True):
@@ -321,3 +353,4 @@ def dist(ctx):
     ctx.excl += ' **/python/*.db'
     ctx.excl += ' **/python.old/*'
     ctx.excl += ' **/python/tests/sounds'
+    ctx.excl += ' **/**.asc'

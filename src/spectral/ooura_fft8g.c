@@ -4,7 +4,7 @@
 //  - add missing prototypes
 //  - use COS and SIN macros
 
-#include "aubio_priv.h"
+#include "../aubio_priv.h"
 
 void cdft(int n, int isgn, smpl_t *a, int *ip, smpl_t *w);
 void rdft(int n, int isgn, smpl_t *a, int *ip, smpl_t *w);

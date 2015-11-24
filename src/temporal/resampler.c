@@ -76,7 +76,7 @@ aubio_resampler_do (aubio_resampler_t * s, fvec_t * input, fvec_t * output)
 #else
 struct _aubio_resampler_t
 {
-	uint_t dummy;
+  void *dummy;
 };
 
 aubio_resampler_t *
