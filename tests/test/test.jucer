@@ -24,8 +24,6 @@
                 file="../../src/io/sink_apple_audio.h"/>
           <FILE id="ONCm9a" name="sink_sndfile.c" compile="1" resource="0" file="../../src/io/sink_sndfile.c"/>
           <FILE id="Pr08vY" name="sink_sndfile.h" compile="0" resource="0" file="../../src/io/sink_sndfile.h"/>
-          <FILE id="JbeYxN" name="sndfileio.c" compile="1" resource="0" file="../../src/io/sndfileio.c"/>
-          <FILE id="wO9PMY" name="sndfileio.h" compile="0" resource="0" file="../../src/io/sndfileio.h"/>
           <FILE id="jJ1rpb" name="source.c" compile="1" resource="0" file="../../src/io/source.c"/>
           <FILE id="Dm11p0" name="source.h" compile="0" resource="0" file="../../src/io/source.h"/>
           <FILE id="utDoTy" name="source_apple_audio.c" compile="1" resource="0"
@@ -160,9 +158,7 @@
           <FILE id="fBY6KE" name="test-filterbank_mel.c" compile="0" resource="0"
                 file="../src/spectral/test-filterbank_mel.c"/>
           <FILE id="Opc6RG" name="test-mfcc.c" compile="0" resource="0" file="../src/spectral/test-mfcc.c"/>
-          <FILE id="dCYDQb" name="test-phasevoc-jack.c" compile="0" resource="0"
-                file="../src/spectral/test-phasevoc-jack.c"/>
-          <FILE id="DcS0qy" name="test-phasevoc.c" compile="1" resource="0" file="../src/spectral/test-phasevoc.c"/>
+          <FILE id="DcS0qy" name="test-phasevoc.c" compile="0" resource="0" file="../src/spectral/test-phasevoc.c"/>
           <FILE id="ZP95tU" name="test-specdesc.c" compile="0" resource="0" file="../src/spectral/test-specdesc.c"/>
           <FILE id="deZA61" name="test-tss.c" compile="0" resource="0" file="../src/spectral/test-tss.c"/>
         </GROUP>
@@ -172,7 +168,7 @@
         <GROUP id="{506AC706-3EF8-71CB-BD3E-27B7362FA1B8}" name="tempo">
           <FILE id="Ghat3n" name="test-beattracking.c" compile="0" resource="0"
                 file="../src/tempo/test-beattracking.c"/>
-          <FILE id="jkY1yv" name="test-tempo.c" compile="0" resource="0" file="../src/tempo/test-tempo.c"/>
+          <FILE id="jkY1yv" name="test-tempo.c" compile="1" resource="0" file="../src/tempo/test-tempo.c"/>
         </GROUP>
         <GROUP id="{991EBA71-05F6-3A9D-42C7-621DCE69E718}" name="temporal">
           <FILE id="TVJzFV" name="test-a_weighting.c" compile="0" resource="0"
@@ -224,6 +220,29 @@
         <MODULEPATH id="juce_audio_processors" path="../../../juce/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
+    <VS2013 targetFolder="Builds/VisualStudio2013" extraDefs="_USE_MATH_DEFINES&#10;AUBIO_HAVE_CONFIG_H&#10;HAVE_WIN_HACKS">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="1" optimisation="1" targetName="test" headerPath="../../../../src/"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
+                       isDebug="0" optimisation="2" targetName="test"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="../../juce"/>
+        <MODULEPATH id="juce_opengl" path="../../juce"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
+        <MODULEPATH id="juce_graphics" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce"/>
+        <MODULEPATH id="juce_cryptography" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+      </MODULEPATHS>
+    </VS2013>
   </EXPORTFORMATS>
   <MODULES>
     <MODULES id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>

@@ -1,5 +1,5 @@
 #include <aubio.h>
-#include "utils_tests.h"
+#include "../../utils_tests.h"
 
 int main (int argc, char **argv)
 {
