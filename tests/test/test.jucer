@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="joPTWd" name="test" projectType="consoleapp" version="1.0.0"
+<JUCERPROJECT id="joPTWd" name="aubio" projectType="consoleapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.test" includeBinaryInAppConfig="1"
-              jucerVersion="3.1.0">
-  <MAINGROUP id="LpTLcP" name="test">
+              jucerVersion="3.2.0">
+  <MAINGROUP id="LpTLcP" name="aubio">
     <GROUP id="{F09F6149-8EF3-EAC9-9664-244916CD3C6D}" name="Source">
       <GROUP id="{8013070B-12A6-267B-AC84-A70B48687BE0}" name="src">
         <FILE id="PZ3Hls" name="aubio.h" compile="0" resource="0" file="../../src/aubio.h"/>
@@ -16,6 +16,8 @@
         <FILE id="SR4HP2" name="fvec.c" compile="1" resource="0" file="../../src/fvec.c"/>
         <FILE id="ApHn3y" name="fvec.h" compile="0" resource="0" file="../../src/fvec.h"/>
         <GROUP id="{75ACB3B8-229A-D4F1-CFDE-267CF2169DC0}" name="io">
+          <FILE id="ixtEgV" name="audio_unit.c" compile="1" resource="0" file="../../src/io/audio_unit.c"/>
+          <FILE id="f4GbqE" name="audio_unit.h" compile="0" resource="0" file="../../src/io/audio_unit.h"/>
           <FILE id="BsuNHP" name="sink.c" compile="1" resource="0" file="../../src/io/sink.c"/>
           <FILE id="rgzLkN" name="sink.h" compile="0" resource="0" file="../../src/io/sink.h"/>
           <FILE id="O1k4Xg" name="sink_apple_audio.c" compile="1" resource="0"
@@ -24,16 +26,26 @@
                 file="../../src/io/sink_apple_audio.h"/>
           <FILE id="ONCm9a" name="sink_sndfile.c" compile="1" resource="0" file="../../src/io/sink_sndfile.c"/>
           <FILE id="Pr08vY" name="sink_sndfile.h" compile="0" resource="0" file="../../src/io/sink_sndfile.h"/>
+          <FILE id="zOR0ny" name="sink_wavwrite.c" compile="1" resource="0" file="../../src/io/sink_wavwrite.c"/>
+          <FILE id="INZKt1" name="sink_wavwrite.h" compile="0" resource="0" file="../../src/io/sink_wavwrite.h"/>
           <FILE id="jJ1rpb" name="source.c" compile="1" resource="0" file="../../src/io/source.c"/>
           <FILE id="Dm11p0" name="source.h" compile="0" resource="0" file="../../src/io/source.h"/>
           <FILE id="utDoTy" name="source_apple_audio.c" compile="1" resource="0"
                 file="../../src/io/source_apple_audio.c"/>
           <FILE id="oMLzAG" name="source_apple_audio.h" compile="0" resource="0"
                 file="../../src/io/source_apple_audio.h"/>
+          <FILE id="Vq2EQQ" name="source_avcodec.c" compile="1" resource="0"
+                file="../../src/io/source_avcodec.c"/>
+          <FILE id="K0BXjB" name="source_avcodec.h" compile="0" resource="0"
+                file="../../src/io/source_avcodec.h"/>
           <FILE id="qrKX4n" name="source_sndfile.c" compile="1" resource="0"
                 file="../../src/io/source_sndfile.c"/>
           <FILE id="wGnui3" name="source_sndfile.h" compile="0" resource="0"
                 file="../../src/io/source_sndfile.h"/>
+          <FILE id="I931P3" name="source_wavread.c" compile="1" resource="0"
+                file="../../src/io/source_wavread.c"/>
+          <FILE id="owlzyp" name="source_wavread.h" compile="0" resource="0"
+                file="../../src/io/source_wavread.h"/>
           <FILE id="DXTVaH" name="utils_apple_audio.c" compile="1" resource="0"
                 file="../../src/io/utils_apple_audio.c"/>
         </GROUP>
@@ -197,7 +209,7 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" extraDefs="AUBIO_HAVE_CONFIG_H">
+    <XCODE_MAC targetFolder="Builds/MacOSX" extraDefs="AUBIO_HAVE_CONFIG_H&#10;">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
                        isDebug="1" optimisation="1" targetName="test" headerPath="../../../../src"/>
@@ -206,12 +218,12 @@
       </CONFIGURATIONS>
       <MODULEPATHS/>
     </XCODE_MAC>
-    <VS2013 targetFolder="Builds/VisualStudio2013" extraDefs="_USE_MATH_DEFINES&#10;AUBIO_HAVE_CONFIG_H&#10;HAVE_WIN_HACKS">
+    <VS2013 targetFolder="Builds/VisualStudio2013" extraDefs="_USE_MATH_DEFINES&#10;AUBIO_HAVE_CONFIG_H&#10;HAVE_WIN_HACKS&#10;HAVE_WAVREAD">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="test" headerPath="../../../../src/"/>
+                       isDebug="1" optimisation="1" targetName="aubio" headerPath="../../../../src/"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="2" targetName="test"/>
+                       isDebug="0" optimisation="2" targetName="aubio" headerPath="../../../../src/"/>
       </CONFIGURATIONS>
       <MODULEPATHS/>
     </VS2013>

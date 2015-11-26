@@ -1,6 +1,8 @@
 #include <aubio.h>
 #include "../../utils_tests.h"
 
+#define SHOW_MSG 0
+
 int main (int argc, char **argv)
 {
   uint_t err = 0;
@@ -19,6 +21,8 @@ int main (int argc, char **argv)
   if ( argc >= 5 ) hop_size = atoi(argv[4]);
   uint_t n_frames = 0, read = 0;
 
+  FILE* fp = fopen("aubio_tempo.txt", "w+");
+
   char_t *source_path = argv[1];
   aubio_source_t * source = new_aubio_source(source_path, samplerate, hop_size);
   if (!source) { err = 1; goto beach; }
@@ -32,6 +36,7 @@ int main (int argc, char **argv)
   // create tempo object
   aubio_tempo_t * o = new_aubio_tempo("default", win_size, hop_size, samplerate);
 
+
   do {
     // put some fresh data in input vector
     aubio_source_do(source, in, &read);
@@ -39,17 +44,22 @@ int main (int argc, char **argv)
     aubio_tempo_do(o,in,out);
     // do something with the beats
     if (out->data[0] != 0) {
+#if SHOW_MSG
       PRINT_MSG("beat at %.3fms, %.3fs, frame %d, %.2fbpm with confidence %.2f\n",
           aubio_tempo_get_last_ms(o), aubio_tempo_get_last_s(o),
           aubio_tempo_get_last(o), aubio_tempo_get_bpm(o), aubio_tempo_get_confidence(o));
+#endif
+	  fprintf(fp, "%10.5f\n", aubio_tempo_get_last_s(o));
     }
     n_frames += read;
   } while ( read == hop_size );
 
+#if SHOW_MSG
   PRINT_MSG("read %.2fs, %d frames at %dHz (%d blocks) from %s\n",
       n_frames * 1. / samplerate,
       n_frames, samplerate,
       n_frames / hop_size, source_path);
+#endif
 
   // clean up memory
   del_aubio_tempo(o);
@@ -58,6 +68,7 @@ int main (int argc, char **argv)
   del_aubio_source(source);
 beach:
   aubio_cleanup();
+  fclose(fp);
 
   return err;
 }
