@@ -1,0 +1,3 @@
+[submodule "vamp"]
+	path = vamp
+	url = https://github.com/dafx/vamp-aubio-plugins.git
