@@ -1,10 +1,18 @@
-#include "aubiowraphell.h"
+#include "aubio-types.h"
 
 static char Py_pvoc_doc[] = "pvoc object";
 
-AUBIO_DECLARE(pvoc, uint_t win_s; uint_t hop_s)
+typedef struct
+{
+  PyObject_HEAD
+  aubio_pvoc_t * o;
+  uint_t win_s;
+  uint_t hop_s;
+  cvec_t *output;
+  fvec_t *routput;
+} Py_pvoc;
 
-//AUBIO_NEW(pvoc)
+
 static PyObject *
 Py_pvoc_new (PyTypeObject * type, PyObject * args, PyObject * kwds)
 {
@@ -49,17 +57,39 @@ Py_pvoc_new (PyTypeObject * type, PyObject * args, PyObject * kwds)
   return (PyObject *) self;
 }
 
+static int
+Py_pvoc_init (Py_pvoc * self, PyObject * args, PyObject * kwds)
+{
+  self->o = new_aubio_pvoc ( self->win_s, self->hop_s);
+  if (self->o == NULL) {
+    char_t errstr[30];
+    sprintf(errstr, "error creating pvoc with %d, %d", self->win_s, self->hop_s);
+    PyErr_SetString (PyExc_RuntimeError, errstr);
+    return -1;
+  }
 
-AUBIO_INIT(pvoc, self->win_s, self->hop_s)
+  self->output = new_cvec(self->win_s);
+  self->routput = new_fvec(self->hop_s);
 
-AUBIO_DEL(pvoc)
+  return 0;
+}
+
+
+static void
+Py_pvoc_del (Py_pvoc *self, PyObject *unused)
+{
+  del_aubio_pvoc(self->o);
+  del_cvec(self->output);
+  del_fvec(self->routput);
+  Py_TYPE(self)->tp_free((PyObject *) self);
+}
+
 
 static PyObject * 
 Py_pvoc_do(Py_pvoc * self, PyObject * args)
 {
   PyObject *input;
   fvec_t *vec;
-  cvec_t *output;
 
   if (!PyArg_ParseTuple (args, "O", &input)) {
     return NULL;
@@ -71,27 +101,24 @@ Py_pvoc_do(Py_pvoc * self, PyObject * args)
     return NULL;
   }
 
-  output = new_cvec(self->win_s);
-
   // compute the function
-  aubio_pvoc_do (self->o, vec, output);
-  return (PyObject *)PyAubio_CCvecToPyCvec(output);
+  aubio_pvoc_do (self->o, vec, self->output);
+  return (PyObject *)PyAubio_CCvecToPyCvec(self->output);
 }
 
-AUBIO_MEMBERS_START(pvoc) 
+static PyMemberDef Py_pvoc_members[] = {
   {"win_s", T_INT, offsetof (Py_pvoc, win_s), READONLY,
     "size of the window"},
   {"hop_s", T_INT, offsetof (Py_pvoc, hop_s), READONLY,
     "size of the hop"},
-AUBIO_MEMBERS_STOP(pvoc)
+  { NULL } // sentinel
+};
 
 static PyObject * 
 Py_pvoc_rdo(Py_pvoc * self, PyObject * args)
 {
   PyObject *input;
   cvec_t *vec;
-  fvec_t *output;
-
   if (!PyArg_ParseTuple (args, "O", &input)) {
     return NULL;
   }
@@ -102,11 +129,9 @@ Py_pvoc_rdo(Py_pvoc * self, PyObject * args)
     return NULL;
   }
 
-  output = new_fvec(self->hop_s);
-
   // compute the function
-  aubio_pvoc_rdo (self->o, vec, output);
-  return (PyObject *)PyAubio_CFvecToArray(output);
+  aubio_pvoc_rdo (self->o, vec, self->routput);
+  return (PyObject *)PyAubio_CFvecToArray(self->routput);
 }
 
 static PyMethodDef Py_pvoc_methods[] = {
@@ -115,4 +140,43 @@ static PyMethodDef Py_pvoc_methods[] = {
   {NULL}
 };
 
-AUBIO_TYPEOBJECT(pvoc, "aubio.pvoc")
+PyTypeObject Py_pvocType = {
+  PyVarObject_HEAD_INIT (NULL, 0)
+  "aubio.pvoc",
+  sizeof (Py_pvoc),
+  0,
+  (destructor) Py_pvoc_del,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  (ternaryfunc)Py_pvoc_do,
+  0,
+  0,
+  0,
+  0,
+  Py_TPFLAGS_DEFAULT,
+  Py_pvoc_doc,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  Py_pvoc_methods,
+  Py_pvoc_members,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  (initproc) Py_pvoc_init,
+  0,
+  Py_pvoc_new,
+};

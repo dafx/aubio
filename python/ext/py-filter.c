@@ -5,6 +5,7 @@ typedef struct
   PyObject_HEAD
   aubio_filter_t * o;
   uint_t order;
+  fvec_t *out;
 } Py_filter;
 
 static char Py_filter_doc[] = "filter object";
@@ -47,15 +48,16 @@ Py_filter_init (Py_filter * self, PyObject * args, PyObject * kwds)
   if (self->o == NULL) {
     return -1;
   }
-
+  self->out = new_fvec(Py_default_vector_length);
   return 0;
 }
 
 static void
 Py_filter_del (Py_filter * self)
 {
+  del_fvec(self->out);
   del_aubio_filter (self->o);
-  self->ob_type->tp_free ((PyObject *) self);
+  Py_TYPE(self)->tp_free ((PyObject *) self);
 }
 
 static PyObject * 
@@ -78,10 +80,14 @@ Py_filter_do(Py_filter * self, PyObject * args)
     return NULL;
   }
 
+  // reallocate the output if needed
+  if (vec->length != self->out->length) {
+    del_fvec(self->out);
+    self->out = new_fvec(vec->length);
+  }
   // compute the function
-  fvec_t * out = new_fvec(vec->length);
-  aubio_filter_do_outplace (self->o, vec, out);
-  return PyAubio_CFvecToArray(out);
+  aubio_filter_do_outplace (self->o, vec, self->out);
+  return PyAubio_CFvecToArray(self->out);
 }
 
 static PyObject * 
@@ -156,8 +162,7 @@ static PyMethodDef Py_filter_methods[] = {
 };
 
 PyTypeObject Py_filterType = {
-  PyObject_HEAD_INIT (NULL)
-  0,                            /* ob_size           */
+  PyVarObject_HEAD_INIT(NULL, 0)
   "aubio.digital_filter",       /* tp_name           */
   sizeof (Py_filter),           /* tp_basicsize      */
   0,                            /* tp_itemsize       */

@@ -30,7 +30,7 @@ class aubio_pvoc_test_case(TestCase):
         win_s, hop_s = 1024, 256
         f = pvoc (win_s, hop_s)
         t = fvec (hop_s)
-        for time in range( 4 * win_s / hop_s ):
+        for time in range( int ( 4 * win_s / hop_s ) ):
             s = f(t)
             r = f.rdo(s)
             assert_equal ( array(t), 0)
@@ -63,7 +63,7 @@ class aubio_pvoc_test_case(TestCase):
         sigin = fvec(hop_s)
         zeros = fvec(hop_s)
         f = pvoc(buf_s, hop_s)
-        for i in xrange(hop_s):
+        for i in range(hop_s):
             sigin[i] = random() * 2. - 1.
         t2 = f.rdo( f(sigin) )
         t2 = f.rdo( f(zeros) )
