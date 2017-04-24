@@ -168,6 +168,8 @@ typedef enum {
   AUBIO_FAIL = 1
 } aubio_status;
 
+#include <stdio.h>
+
 #ifdef HAVE_C99_VARARGS_MACROS
 #define AUBIO_ERR(...)               fprintf(stderr, "AUBIO ERROR: " __VA_ARGS__)
 #define AUBIO_MSG(...)               fprintf(stdout, __VA_ARGS__)
@@ -283,6 +285,10 @@ typedef enum {
 #define UNUSED __attribute__((unused))
 #else
 #define UNUSED
+#endif
+
+#ifndef NULL
+#define NULL 0
 #endif
 
 #endif /* _AUBIO__PRIV_H */
