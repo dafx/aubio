@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="joPTWd" name="aubio" projectType="consoleapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.test" includeBinaryInAppConfig="1"
-              jucerVersion="3.2.0">
+              jucerVersion="5.2.1" cppLanguageStandard="11" headerPath="../../../../src/">
   <MAINGROUP id="LpTLcP" name="aubio">
     <GROUP id="{F09F6149-8EF3-EAC9-9664-244916CD3C6D}" name="Source">
       <GROUP id="{8013070B-12A6-267B-AC84-A70B48687BE0}" name="src">
@@ -73,10 +73,14 @@
           <FILE id="CZh78s" name="pitchspecacf.h" compile="0" resource="0" file="../../src/pitch/pitchspecacf.h"/>
           <FILE id="txVALL" name="pitchyin.c" compile="1" resource="0" file="../../src/pitch/pitchyin.c"/>
           <FILE id="qAfr1v" name="pitchyin.h" compile="0" resource="0" file="../../src/pitch/pitchyin.h"/>
+          <FILE id="h4RRLB" name="pitchyinfast.c" compile="1" resource="0" file="../../src/pitch/pitchyinfast.c"/>
+          <FILE id="WfDB7T" name="pitchyinfast.h" compile="0" resource="0" file="../../src/pitch/pitchyinfast.h"/>
           <FILE id="KtlzV7" name="pitchyinfft.c" compile="1" resource="0" file="../../src/pitch/pitchyinfft.c"/>
           <FILE id="DkUG5n" name="pitchyinfft.h" compile="0" resource="0" file="../../src/pitch/pitchyinfft.h"/>
         </GROUP>
         <GROUP id="{05C822BE-DA09-D1FA-4ABB-B2781E3BF933}" name="spectral">
+          <FILE id="JH5F9S" name="awhitening.c" compile="1" resource="0" file="../../src/spectral/awhitening.c"/>
+          <FILE id="nmHYRQ" name="awhitening.h" compile="0" resource="0" file="../../src/spectral/awhitening.h"/>
           <FILE id="HJxEnZ" name="fft.c" compile="1" resource="0" file="../../src/spectral/fft.c"/>
           <FILE id="KzxG0L" name="fft.h" compile="0" resource="0" file="../../src/spectral/fft.h"/>
           <FILE id="jTb3Rh" name="filterbank.c" compile="1" resource="0" file="../../src/spectral/filterbank.c"/>
@@ -122,8 +126,13 @@
         <GROUP id="{F2629EB1-49D0-AD13-353B-DA4ED6A78EFF}" name="utils">
           <FILE id="CKaJVl" name="hist.c" compile="1" resource="0" file="../../src/utils/hist.c"/>
           <FILE id="gNcEGt" name="hist.h" compile="0" resource="0" file="../../src/utils/hist.h"/>
+          <FILE id="pWnhdZ" name="log.c" compile="1" resource="0" file="../../src/utils/log.c"/>
+          <FILE id="ukUrGb" name="log.h" compile="0" resource="0" file="../../src/utils/log.h"/>
+          <FILE id="U9QG1O" name="parameter.c" compile="1" resource="0" file="../../src/utils/parameter.c"/>
+          <FILE id="PzwWGi" name="parameter.h" compile="0" resource="0" file="../../src/utils/parameter.h"/>
           <FILE id="rbHliD" name="scale.c" compile="1" resource="0" file="../../src/utils/scale.c"/>
           <FILE id="yv0Zv4" name="scale.h" compile="0" resource="0" file="../../src/utils/scale.h"/>
+          <FILE id="plNoYn" name="windll.c" compile="1" resource="0" file="../../src/utils/windll.c"/>
         </GROUP>
         <FILE id="Fcpcw9" name="vecutils.c" compile="1" resource="0" file="../../src/vecutils.c"/>
         <FILE id="zjWjc4" name="vecutils.h" compile="0" resource="0" file="../../src/vecutils.h"/>
@@ -211,10 +220,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" extraDefs="AUBIO_HAVE_CONFIG_H&#10;">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="test" headerPath="../../../../src"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="0" optimisation="2" targetName="test"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="test" headerPath="../../../../src"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="test"/>
       </CONFIGURATIONS>
       <MODULEPATHS/>
     </XCODE_MAC>
@@ -227,6 +234,12 @@
       </CONFIGURATIONS>
       <MODULEPATHS/>
     </VS2013>
+    <VS2017 targetFolder="Builds/VisualStudio2017" extraDefs="_USE_MATH_DEFINES&#10;AUBIO_HAVE_CONFIG_H&#10;HAVE_WIN_HACKS&#10;HAVE_WAVREAD">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+    </VS2017>
   </EXPORTFORMATS>
   <MODULES/>
   <JUCEOPTIONS/>
