@@ -216,6 +216,18 @@
     <ClInclude Include="..\..\src\utils\scale.h">
       <Filter>Source Files\src\utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\utils\log.h">
+      <Filter>Source Files\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utils\parameter.h">
+      <Filter>Source Files\src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\spectral\awhitening.h">
+      <Filter>Source Files\src\spectral</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\pitch\pitchyinfast.h">
+      <Filter>Source Files\src\pitch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cvec.c">
@@ -352,6 +364,21 @@
     </ClCompile>
     <ClCompile Include="..\..\src\utils\scale.c">
       <Filter>Source Files\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utils\log.c">
+      <Filter>Source Files\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utils\parameter.c">
+      <Filter>Source Files\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utils\windll.c">
+      <Filter>Source Files\src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\spectral\awhitening.c">
+      <Filter>Source Files\src\spectral</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pitch\pitchyinfast.c">
+      <Filter>Source Files\src\pitch</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

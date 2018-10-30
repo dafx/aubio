@@ -26,28 +26,29 @@
 #include "../mathutils.h"
 #include "../utils/hist.h"
 
-void aubio_specdesc_energy(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset);
-void aubio_specdesc_hfc(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset);
-void aubio_specdesc_complex(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset);
-void aubio_specdesc_phase(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset);
-void aubio_specdesc_specdiff(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset);
-void aubio_specdesc_kl(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset);
-void aubio_specdesc_mkl(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset);
-void aubio_specdesc_specflux(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset);
+void aubio_specdesc_energy(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset);
+void aubio_specdesc_hfc(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset);
+void aubio_specdesc_complex(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset);
+void aubio_specdesc_phase(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset);
+void aubio_specdesc_wphase(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset);
+void aubio_specdesc_specdiff(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset);
+void aubio_specdesc_kl(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset);
+void aubio_specdesc_mkl(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset);
+void aubio_specdesc_specflux(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset);
 
-extern void aubio_specdesc_centroid (aubio_specdesc_t * o, cvec_t * spec,
+extern void aubio_specdesc_centroid (aubio_specdesc_t * o, const cvec_t * spec,
     fvec_t * desc);
-extern void aubio_specdesc_spread (aubio_specdesc_t * o, cvec_t * spec,
+extern void aubio_specdesc_spread (aubio_specdesc_t * o, const cvec_t * spec,
     fvec_t * desc);
-extern void aubio_specdesc_skewness (aubio_specdesc_t * o, cvec_t * spec,
+extern void aubio_specdesc_skewness (aubio_specdesc_t * o, const cvec_t * spec,
     fvec_t * desc);
-extern void aubio_specdesc_kurtosis (aubio_specdesc_t * o, cvec_t * spec,
+extern void aubio_specdesc_kurtosis (aubio_specdesc_t * o, const cvec_t * spec,
     fvec_t * desc);
-extern void aubio_specdesc_slope (aubio_specdesc_t * o, cvec_t * spec,
+extern void aubio_specdesc_slope (aubio_specdesc_t * o, const cvec_t * spec,
     fvec_t * desc);
-extern void aubio_specdesc_decrease (aubio_specdesc_t * o, cvec_t * spec,
+extern void aubio_specdesc_decrease (aubio_specdesc_t * o, const cvec_t * spec,
     fvec_t * desc);
-extern void aubio_specdesc_rolloff (aubio_specdesc_t * o, cvec_t * spec,
+extern void aubio_specdesc_rolloff (aubio_specdesc_t * o, const cvec_t * spec,
     fvec_t * desc);
 
 /** onsetdetection types */
@@ -57,6 +58,7 @@ typedef enum {
         aubio_onset_hfc,            /**< high frequency content */
         aubio_onset_complex,        /**< complex domain */        
         aubio_onset_phase,          /**< phase fast */            
+        aubio_onset_wphase,         /**< weighted phase */
         aubio_onset_kl,             /**< Kullback Liebler */
         aubio_onset_mkl,            /**< modified Kullback Liebler */
         aubio_onset_specflux,       /**< spectral flux */
@@ -75,7 +77,7 @@ struct _aubio_specdesc_t {
   aubio_specdesc_type onset_type; /**< onset detection type */
   /** Pointer to aubio_specdesc_<type> function */
   void (*funcpointer)(aubio_specdesc_t *o,
-      cvec_t * fftgrain, fvec_t * onset);
+      const cvec_t * fftgrain, fvec_t * onset);
   smpl_t threshold;      /**< minimum norm threshold for phase and specdiff */
   fvec_t *oldmag;        /**< previous norm vector */
   fvec_t *dev1 ;         /**< current onset detection measure vector */
@@ -87,7 +89,7 @@ struct _aubio_specdesc_t {
 
 /* Energy based onset detection function */
 void aubio_specdesc_energy  (aubio_specdesc_t *o UNUSED,
-    cvec_t * fftgrain, fvec_t * onset) {
+    const cvec_t * fftgrain, fvec_t * onset) {
   uint_t j;
   onset->data[0] = 0.;
   for (j=0;j<fftgrain->length;j++) {
@@ -97,7 +99,7 @@ void aubio_specdesc_energy  (aubio_specdesc_t *o UNUSED,
 
 /* High Frequency Content onset detection function */
 void aubio_specdesc_hfc(aubio_specdesc_t *o UNUSED,
-    cvec_t * fftgrain, fvec_t * onset){
+    const cvec_t * fftgrain, fvec_t * onset){
   uint_t j;
   onset->data[0] = 0.;
   for (j=0;j<fftgrain->length;j++) {
@@ -107,7 +109,7 @@ void aubio_specdesc_hfc(aubio_specdesc_t *o UNUSED,
 
 
 /* Complex Domain Method onset detection function */
-void aubio_specdesc_complex (aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset) {
+void aubio_specdesc_complex (aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset) {
   uint_t j;
   uint_t nbins = fftgrain->length;
   onset->data[0] = 0.;
@@ -131,7 +133,7 @@ void aubio_specdesc_complex (aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * on
 
 /* Phase Based Method onset detection function */
 void aubio_specdesc_phase(aubio_specdesc_t *o, 
-    cvec_t * fftgrain, fvec_t * onset){
+    const cvec_t * fftgrain, fvec_t * onset){
   uint_t j;
   uint_t nbins = fftgrain->length;
   onset->data[0] = 0.0;
@@ -159,9 +161,26 @@ void aubio_specdesc_phase(aubio_specdesc_t *o,
   //onset->data[0] = fvec_mean(o->dev1);
 }
 
+/* weighted phase */
+void
+aubio_specdesc_wphase(aubio_specdesc_t *o,
+    const cvec_t *fftgrain, fvec_t *onset) {
+  uint_t i;
+  aubio_specdesc_phase(o, fftgrain, onset);
+  for (i = 0; i < fftgrain->length; i++) {
+    o->dev1->data[i] *= fftgrain->norm[i];
+  }
+  /* apply o->histogram */
+  aubio_hist_dyn_notnull(o->histog,o->dev1);
+  /* weight it */
+  aubio_hist_weight(o->histog);
+  /* its mean is the result */
+  onset->data[0] = aubio_hist_mean(o->histog);
+}
+
 /* Spectral difference method onset detection function */
 void aubio_specdesc_specdiff(aubio_specdesc_t *o,
-    cvec_t * fftgrain, fvec_t * onset){
+    const cvec_t * fftgrain, fvec_t * onset){
   uint_t j;
   uint_t nbins = fftgrain->length;
     onset->data[0] = 0.0;
@@ -188,7 +207,7 @@ void aubio_specdesc_specdiff(aubio_specdesc_t *o,
 /* Kullback Liebler onset detection function
  * note we use ln(1+Xn/(Xn-1+0.0001)) to avoid 
  * negative (1.+) and infinite values (+1.e-10) */
-void aubio_specdesc_kl(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset){
+void aubio_specdesc_kl(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset){
   uint_t j;
     onset->data[0] = 0.;
     for (j=0;j<fftgrain->length;j++) {
@@ -202,7 +221,7 @@ void aubio_specdesc_kl(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset){
 /* Modified Kullback Liebler onset detection function
  * note we use ln(1+Xn/(Xn-1+0.0001)) to avoid 
  * negative (1.+) and infinite values (+1.e-10) */
-void aubio_specdesc_mkl(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset){
+void aubio_specdesc_mkl(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset){
   uint_t j;
     onset->data[0] = 0.;
     for (j=0;j<fftgrain->length;j++) {
@@ -213,7 +232,7 @@ void aubio_specdesc_mkl(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset){
 }
 
 /* Spectral flux */
-void aubio_specdesc_specflux(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * onset){ 
+void aubio_specdesc_specflux(aubio_specdesc_t *o, const cvec_t * fftgrain, fvec_t * onset){ 
   uint_t j;
   onset->data[0] = 0.;
   for (j=0;j<fftgrain->length;j++) {
@@ -225,7 +244,7 @@ void aubio_specdesc_specflux(aubio_specdesc_t *o, cvec_t * fftgrain, fvec_t * on
 
 /* Generic function pointing to the choosen one */
 void 
-aubio_specdesc_do (aubio_specdesc_t *o, cvec_t * fftgrain, 
+aubio_specdesc_do (aubio_specdesc_t *o, const cvec_t * fftgrain, 
     fvec_t * onset) {
   o->funcpointer(o,fftgrain,onset);
 }
@@ -234,7 +253,7 @@ aubio_specdesc_do (aubio_specdesc_t *o, cvec_t * fftgrain,
  * depending on the choosen type, allocate memory as needed
  */
 aubio_specdesc_t * 
-new_aubio_specdesc (char_t * onset_mode, uint_t size){
+new_aubio_specdesc (const char_t * onset_mode, uint_t size){
   aubio_specdesc_t * o = AUBIO_NEW(aubio_specdesc_t);
   uint_t rsize = size/2+1;
   aubio_specdesc_type onset_type;
@@ -250,6 +269,8 @@ new_aubio_specdesc (char_t * onset_mode, uint_t size){
       onset_type = aubio_onset_complex;
   else if (strcmp (onset_mode, "phase") == 0)
       onset_type = aubio_onset_phase;
+  else if (strcmp (onset_mode, "wphase") == 0)
+      onset_type = aubio_onset_wphase;
   else if (strcmp (onset_mode, "mkl") == 0)
       onset_type = aubio_onset_mkl;
   else if (strcmp (onset_mode, "kl") == 0)
@@ -270,15 +291,18 @@ new_aubio_specdesc (char_t * onset_mode, uint_t size){
       onset_type = aubio_specmethod_decrease;
   else if (strcmp (onset_mode, "rolloff") == 0)
       onset_type = aubio_specmethod_rolloff;
+  else if (strcmp (onset_mode, "old_default") == 0)
+      onset_type = aubio_onset_default;
   else if (strcmp (onset_mode, "default") == 0)
       onset_type = aubio_onset_default;
   else {
-      AUBIO_ERR("unknown spectral descriptor type %s, using default.\n", onset_mode);
-      onset_type = aubio_onset_default;
+      AUBIO_ERR("unknown spectral descriptor type %s\n", onset_mode);
+      AUBIO_FREE(o);
+      return NULL;
   }
   switch(onset_type) {
     /* for both energy and hfc, only fftgrain->norm is required */
-    case aubio_onset_energy: 
+    case aubio_onset_energy:
       break;
     case aubio_onset_hfc:
       break;
@@ -290,6 +314,7 @@ new_aubio_specdesc (char_t * onset_mode, uint_t size){
       o->theta2 = new_fvec(rsize);
       break;
     case aubio_onset_phase:
+    case aubio_onset_wphase:
       o->dev1   = new_fvec(rsize);
       o->theta1 = new_fvec(rsize);
       o->theta2 = new_fvec(rsize);
@@ -323,6 +348,9 @@ new_aubio_specdesc (char_t * onset_mode, uint_t size){
       break;
     case aubio_onset_phase:
       o->funcpointer = aubio_specdesc_phase;
+      break;
+    case aubio_onset_wphase:
+      o->funcpointer = aubio_specdesc_wphase;
       break;
     case aubio_onset_specdiff:
       o->funcpointer = aubio_specdesc_specdiff;
@@ -366,7 +394,7 @@ new_aubio_specdesc (char_t * onset_mode, uint_t size){
 
 void del_aubio_specdesc (aubio_specdesc_t *o){
   switch(o->onset_type) {
-    case aubio_onset_energy: 
+    case aubio_onset_energy:
       break;
     case aubio_onset_hfc:
       break;
@@ -377,6 +405,7 @@ void del_aubio_specdesc (aubio_specdesc_t *o){
       del_fvec(o->theta2);
       break;
     case aubio_onset_phase:
+    case aubio_onset_wphase:
       del_fvec(o->dev1);
       del_fvec(o->theta1);
       del_fvec(o->theta2);

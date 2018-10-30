@@ -24,8 +24,8 @@
  * This file is for inclusion from _within_ the library only.
  */
 
-#ifndef _AUBIO__PRIV_H
-#define _AUBIO__PRIV_H
+#ifndef AUBIO_PRIV_H
+#define AUBIO_PRIV_H
 
 /*********************
  *
@@ -33,15 +33,15 @@
  *
  */
 
-#if AUBIO_HAVE_CONFIG_H
+#ifdef AUBIO_HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#if HAVE_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 
-#if HAVE_STDIO_H
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
 
@@ -66,10 +66,14 @@
 #include <limits.h> // for CHAR_BIT, in C99 standard
 #endif
 
+#ifdef HAVE_STDARG_H
+#include <stdarg.h>
+#endif
+
 #ifdef HAVE_ACCELERATE
 #define HAVE_ATLAS 1
 #include <Accelerate/Accelerate.h>
-#elif HAVE_ATLAS_CBLAS_H
+#elif defined(HAVE_ATLAS_CBLAS_H)
 #define HAVE_ATLAS 1
 #include <atlas/cblas.h>
 #else
@@ -78,7 +82,7 @@
 
 #ifdef HAVE_ACCELERATE
 #include <Accelerate/Accelerate.h>
-#if !HAVE_AUBIO_DOUBLE
+#ifndef HAVE_AUBIO_DOUBLE
 #define aubio_vDSP_mmov       vDSP_mmov
 #define aubio_vDSP_vmul       vDSP_vmul
 #define aubio_vDSP_vfill      vDSP_vfill
@@ -88,6 +92,8 @@
 #define aubio_vDSP_maxvi      vDSP_maxvi
 #define aubio_vDSP_minv       vDSP_minv
 #define aubio_vDSP_minvi      vDSP_minvi
+#define aubio_vDSP_dotpr      vDSP_dotpr
+#define aubio_vDSP_vclr       vDSP_vclr
 #else /* HAVE_AUBIO_DOUBLE */
 #define aubio_vDSP_mmov       vDSP_mmovD
 #define aubio_vDSP_vmul       vDSP_vmulD
@@ -98,11 +104,13 @@
 #define aubio_vDSP_maxvi      vDSP_maxviD
 #define aubio_vDSP_minv       vDSP_minvD
 #define aubio_vDSP_minvi      vDSP_minviD
+#define aubio_vDSP_dotpr      vDSP_dotprD
+#define aubio_vDSP_vclr       vDSP_vclrD
 #endif /* HAVE_AUBIO_DOUBLE */
 #endif /* HAVE_ACCELERATE */
 
 #ifdef HAVE_ATLAS
-#if !HAVE_AUBIO_DOUBLE
+#ifndef HAVE_AUBIO_DOUBLE
 #define aubio_catlas_set      catlas_sset
 #define aubio_cblas_copy      cblas_scopy
 #define aubio_cblas_swap      cblas_sswap
@@ -115,7 +123,38 @@
 #endif /* HAVE_AUBIO_DOUBLE */
 #endif /* HAVE_ATLAS */
 
-#if !defined(HAVE_MEMCPY_HACKS) && !defined(HAVE_ACCELERATE) && !defined(HAVE_ATLAS)
+#if defined HAVE_INTEL_IPP
+#include <ippcore.h>
+#include <ippvm.h>
+#include <ipps.h>
+#ifndef HAVE_AUBIO_DOUBLE
+#define aubio_ippsSet         ippsSet_32f
+#define aubio_ippsZero        ippsZero_32f
+#define aubio_ippsCopy        ippsCopy_32f
+#define aubio_ippsMul         ippsMul_32f
+#define aubio_ippsMulC        ippsMulC_32f
+#define aubio_ippsAddC        ippsAddC_32f
+#define aubio_ippsLn          ippsLn_32f_A21
+#define aubio_ippsMean(a,b,c) ippsMean_32f(a, b, c, ippAlgHintFast)
+#define aubio_ippsSum(a,b,c)  ippsSum_32f(a, b, c, ippAlgHintFast)
+#define aubio_ippsMax         ippsMax_32f
+#define aubio_ippsMin         ippsMin_32f
+#else /* HAVE_AUBIO_DOUBLE */
+#define aubio_ippsSet         ippsSet_64f
+#define aubio_ippsZero        ippsZero_64f
+#define aubio_ippsCopy        ippsCopy_64f
+#define aubio_ippsMul         ippsMul_64f
+#define aubio_ippsMulC        ippsMulC_64f
+#define aubio_ippsAddC        ippsAddC_64f
+#define aubio_ippsLn          ippsLn_64f_A26
+#define aubio_ippsMean        ippsMean_64f
+#define aubio_ippsSum         ippsSum_64f
+#define aubio_ippsMax         ippsMax_64f
+#define aubio_ippsMin         ippsMin_64f
+#endif /* HAVE_AUBIO_DOUBLE */
+#endif
+
+#if !defined(HAVE_MEMCPY_HACKS) && !defined(HAVE_ACCELERATE) && !defined(HAVE_ATLAS) && !defined(HAVE_INTEL_IPP)
 #define HAVE_NOOPT 1
 #else
 #undef HAVE_NOOPT
@@ -168,24 +207,34 @@ typedef enum {
   AUBIO_FAIL = 1
 } aubio_status;
 
-#include <stdio.h>
+/* Logging */
+
+#include "utils/log.h"
+
+/** internal logging function, defined in utils/log.c */
+uint_t aubio_log(sint_t level, const char_t *fmt, ...);
 
 #ifdef HAVE_C99_VARARGS_MACROS
-#define AUBIO_ERR(...)               fprintf(stderr, "AUBIO ERROR: " __VA_ARGS__)
-#define AUBIO_MSG(...)               fprintf(stdout, __VA_ARGS__)
-#define AUBIO_DBG(...)               fprintf(stderr, __VA_ARGS__)
-#define AUBIO_WRN(...)               fprintf(stderr, "AUBIO WARNING: " __VA_ARGS__)
+#define AUBIO_ERR(...)               aubio_log(AUBIO_LOG_ERR, "AUBIO ERROR: " __VA_ARGS__)
+#define AUBIO_INF(...)               aubio_log(AUBIO_LOG_INF, "AUBIO INFO: " __VA_ARGS__)
+#define AUBIO_MSG(...)               aubio_log(AUBIO_LOG_MSG, __VA_ARGS__)
+#define AUBIO_DBG(...)               aubio_log(AUBIO_LOG_DBG, __VA_ARGS__)
+#define AUBIO_WRN(...)               aubio_log(AUBIO_LOG_WRN, "AUBIO WARNING: " __VA_ARGS__)
 #else
-#define AUBIO_ERR(format, args...)   fprintf(stderr, "AUBIO ERROR: " format , ##args)
-#define AUBIO_MSG(format, args...)   fprintf(stdout, format , ##args)
-#define AUBIO_DBG(format, args...)   fprintf(stderr, format , ##args)
-#define AUBIO_WRN(format, args...)   fprintf(stderr, "AUBIO WARNING: " format, ##args)
+#define AUBIO_ERR(format, args...)   aubio_log(AUBIO_LOG_ERR, "AUBIO ERROR: " format , ##args)
+#define AUBIO_INF(format, args...)   aubio_log(AUBIO_LOG_INF, "AUBIO INFO: " format , ##args)
+#define AUBIO_MSG(format, args...)   aubio_log(AUBIO_LOG_MSG, format , ##args)
+#define AUBIO_DBG(format, args...)   aubio_log(AUBIO_LOG_DBG, format , ##args)
+#define AUBIO_WRN(format, args...)   aubio_log(AUBIO_LOG_WRN, "AUBIO WARNING: " format, ##args)
 #endif
 
 #define AUBIO_ERROR   AUBIO_ERR
 
 #define AUBIO_QUIT(_s)               exit(_s)
 #define AUBIO_SPRINTF                sprintf
+
+#define AUBIO_MAX_SAMPLERATE (192000*8)
+#define AUBIO_MAX_CHANNELS 1024
 
 /* pi and 2*pi */
 #ifndef M_PI
@@ -194,6 +243,10 @@ typedef enum {
 #define PI         (M_PI)
 #endif
 #define TWO_PI     (PI*2.)
+
+#ifndef PATH_MAX
+#define PATH_MAX 1024
+#endif
 
 /* aliases to math.h functions */
 #if !HAVE_AUBIO_DOUBLE
@@ -207,6 +260,7 @@ typedef enum {
 #define LOG        logf
 #define FLOOR      floorf
 #define CEIL       ceilf
+#define ATAN       atanf
 #define ATAN2      atan2f
 #else
 #define EXP        exp
@@ -219,6 +273,7 @@ typedef enum {
 #define LOG        log
 #define FLOOR      floor
 #define CEIL       ceil
+#define ATAN       atan
 #define ATAN2      atan2
 #endif
 #define ROUND(x)   FLOOR(x+.5)
@@ -250,6 +305,11 @@ typedef enum {
 #define REAL      crealf
 /** sample = IMAG(complex) */
 #define IMAG      cimagf
+#endif
+
+/* avoid unresolved symbol with msvc 9 */
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define isnan _isnan
 #endif
 
 /* handy shortcuts */
@@ -287,8 +347,16 @@ typedef enum {
 #define UNUSED
 #endif
 
+/* are we using gcc -std=c99 ? */
+#if defined(__STRICT_ANSI__)
+#define strnlen(a,b) MIN(strlen(a),b)
+#if !HAVE_AUBIO_DOUBLE
+#define floorf floor
+#endif
+#endif /* __STRICT_ANSI__ */
+
 #ifndef NULL
 #define NULL 0
 #endif
 
-#endif /* _AUBIO__PRIV_H */
+#endif /* AUBIO_PRIV_H */

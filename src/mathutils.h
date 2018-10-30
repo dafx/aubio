@@ -27,8 +27,8 @@
 
  */
 
-#ifndef _AUBIO_MATHUTILS_H
-#define _AUBIO_MATHUTILS_H
+#ifndef AUBIO_MATHUTILS_H
+#define AUBIO_MATHUTILS_H
 
 #include "fvec.h"
 #include "musicutils.h"
@@ -98,6 +98,35 @@ resulting spectrum. See Amalia de Götzen's paper referred to above.
 
 */
 void fvec_shift (fvec_t * v);
+
+/** swap the left and right halves of a vector
+
+  This function swaps the left part of the signal with the right part of the
+signal. Therefore
+
+  \f$ a[0], a[1], ..., a[\frac{N}{2}], a[\frac{N}{2}+1], ..., a[N-1], a[N] \f$
+
+  becomes
+
+  \f$ a[\frac{N}{2}+1], ..., a[N-1], a[N], a[0], a[1], ..., a[\frac{N}{2}] \f$
+
+  This operation, known as 'ifftshift' in the Matlab Signal Processing Toolbox,
+can be used after computing the inverse FFT to simplify the phase relationship
+of the resulting spectrum. See Amalia de Götzen's paper referred to above.
+
+*/
+void fvec_ishift (fvec_t * v);
+
+/** push a new element to the end of a vector, erasing the first element and
+ * sliding all others
+
+  \param in vector to push to
+  \param new_elem new_element to add at the end of the vector
+
+  In numpy words, this is equivalent to: in = np.concatenate([in, [new_elem]])[1:]
+
+*/
+void fvec_push(fvec_t *in, smpl_t new_elem);
 
 /** compute the sum of all elements of a vector
 
@@ -232,7 +261,7 @@ smpl_t fvec_median (fvec_t * v);
   \return \f$ p + p_{frac} \f$ exact peak position of interpolated maximum or minimum
 
 */
-smpl_t fvec_quadratic_peak_pos (fvec_t * x, uint_t p);
+smpl_t fvec_quadratic_peak_pos (const fvec_t * x, uint_t p);
 
 /** finds magnitude of peak by quadratic interpolation
 
@@ -275,7 +304,7 @@ peak is defined as follows:
   \return 1 if a peak is found, 0 otherwise
 
 */
-uint_t fvec_peakpick (fvec_t * v, uint_t p);
+uint_t fvec_peakpick (const fvec_t * v, uint_t p);
 
 /** return 1 if a is a power of 2, 0 otherwise */
 uint_t aubio_is_power_of_two(uint_t a);
@@ -283,16 +312,19 @@ uint_t aubio_is_power_of_two(uint_t a);
 /** return the next power of power of 2 greater than a */
 uint_t aubio_next_power_of_two(uint_t a);
 
+/** return the log2 factor of the given power of 2 value a */
+uint_t aubio_power_of_two_order(uint_t a);
+
 /** compute normalised autocorrelation function
 
   \param input vector to compute autocorrelation from
   \param output vector to store autocorrelation function to
 
 */
-void aubio_autocorr (fvec_t * input, fvec_t * output);
+void aubio_autocorr (const fvec_t * input, fvec_t * output);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _AUBIO_MATHUTILS_H */
+#endif /* AUBIO_MATHUTILS_H */

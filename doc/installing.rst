@@ -1,65 +1,79 @@
-.. highlight:: bash
-
 Installing aubio
 ================
 
-A number of distributions already include aubio. Check your favorite package
-management system, or have a look at the `download page
-<http://aubio.org/download>`_.
+aubio runs on Linux, Windows, macOS, iOS, Android, and probably a few others
+operating systems.
 
-aubio uses `waf <https://waf.io/>`_ to configure, compile, and test the source.
-A copy of ``waf`` is included along aubio, so all you need is a ``terminal``
-and a recent ``python`` installed.
+Aubio is available as a C library and as a python module.
 
-Source code
+Cheat sheet
 -----------
 
-Check out the `download page <http://aubio.org/download>`_ for more options:
-http://aubio.org/download.
+- :ref:`get aubio latest source code <building>`::
 
-The latest stable release can be found at http://aubio.org/pub/::
+    # official repo
+    git clone https://git.aubio.org/aubio/aubio
+    # mirror
+    git clone https://github.com/aubio/aubio
+    # latest release
+    wget https://aubio.org/pub/aubio-<version>.tar.gz
 
-        $ curl -O http://aubio.org/pub/aubio-0.4.1.tar.bz2
-        $ tar xf aubio-0.4.1.tar.bz2
-        $ cd aubio-0.4.1
 
-The latest develop branch can be obtained with::
+- :ref:`build aubio from source <building>`::
 
-        $ git clone git://git.aubio.org/git/aubio/ aubio-devel
-        $ cd aubio-devel
-        $ git fetch origin develop:develop
-        $ git checkout develop
+    # 1. simple
+    cd aubio
+    make
 
-Compiling
----------
+    # 2. step by step
+    ./scripts/get_waf.sh
+    ./waf configure
+    ./waf build
+    sudo ./waf install
 
-To compile the C library, examples programs, and tests, run::
+- :ref:`install python-aubio from source <python>`::
 
-        $ ./waf configure
+    # from git
+    pip install git+https://git.aubio.org/aubio/aubio/
+    # mirror
+    pip install git+https://github.com/aubio/aubio/
+    # from latest release
+    pip install https://aubio.org/pub/aubio-latest.tar.bz2
+    # from pypi
+    pip install aubio
+    # from source directory
+    cd aubio
+    pip install -v .
 
-Check out the available options using ``./waf configure --help | less``. Once
-you are done with configuration, you can start building::
+- :ref:`install python-aubio from a pre-compiled binary <python>`::
 
-        $ ./waf build
+      # conda [osx, linux, win]
+      conda install -c conda-forge aubio
+      # .deb (debian, ubuntu) [linux]
+      sudo apt-get install python3-aubio python-aubio aubio-tools
+      # brew [osx]
+      brew install aubio --with-python
 
-To install the freshly built C library and tools, simply run the following
-command::
+- :ref:`get a pre-compiled version of libaubio <download>`::
 
-        $ sudo ./waf install
+    # .deb (linux) WARNING: old version
+    sudo apt-get install aubio-tools
 
-Cleaning
---------
+    # python module
+    ./setup.py install
+    # using pip
+    pip install .
 
-If you wish to uninstall the files installed by the ``install`` command, use
-``uninstall``::
+- :ref:`check the list of optional dependencies <requirements>`::
 
-        $ sudo ./waf uninstall
+    # debian / ubuntu
+    dpkg -l libavcodec-dev libavutil-dev libavformat-dev \
+            libswresample-dev libavresample-dev \
+            libsamplerate-dev libsndfile-dev \
+            txt2man doxygen
 
-To clean the source directory, use the ``clean`` command::
+.. include:: download.rst
 
-        $ ./waf clean
+.. include:: building.rst
 
-To also forget the options previously passed to the last ``./waf configure``
-invocation, use the ``distclean`` command::
-
-        $ ./waf distclean
+.. include:: requirements.rst
