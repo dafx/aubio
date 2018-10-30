@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>libaubio</ProjectName>
+    <ProjectGuid>{643531F3-E697-4C15-B0EE-8EC2523A923B}</ProjectGuid>
+    <RootNamespace>AubioVamp</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>Debug\</OutDir>
+    <IntDir>Debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>Release\</OutDir>
+    <IntDir>Release\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)/..;$(ProjectDir)/../../src;$(ProjectDir)/../../../src;$(ProjectDir)/../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;VAMPEXAMPLEPLUGINS_EXPORTS;_USE_MATH_DEFINES;AUBIO_HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ObjectFileName>$(IntDir)\%(Extension)\</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/EXPORT:vampGetPluginDescriptor %(AdditionalOptions)</AdditionalOptions>
+      <OutputFile>$(OutDir)vamp-aubio.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)/..;$(ProjectDir)/../../src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;VAMPEXAMPLEPLUGINS_EXPORTS;AUBIO_HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/EXPORT:vampGetPluginDescriptor %(AdditionalOptions)</AdditionalOptions>
+      <OutputFile>$(OutDir)vamp-example-plugins.dll</OutputFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\aubio.h" />
+    <ClInclude Include="..\..\src\aubio_priv.h" />
+    <ClInclude Include="..\..\src\config.h" />
+    <ClInclude Include="..\..\src\cvec.h" />
+    <ClInclude Include="..\..\src\fmat.h" />
+    <ClInclude Include="..\..\src\fvec.h" />
+    <ClInclude Include="..\..\src\io\audio_unit.h" />
+    <ClInclude Include="..\..\src\io\sink.h" />
+    <ClInclude Include="..\..\src\io\sink_apple_audio.h" />
+    <ClInclude Include="..\..\src\io\sink_sndfile.h" />
+    <ClInclude Include="..\..\src\io\sink_wavwrite.h" />
+    <ClInclude Include="..\..\src\io\source.h" />
+    <ClInclude Include="..\..\src\io\source_apple_audio.h" />
+    <ClInclude Include="..\..\src\io\source_avcodec.h" />
+    <ClInclude Include="..\..\src\io\source_sndfile.h" />
+    <ClInclude Include="..\..\src\io\source_wavread.h" />
+    <ClInclude Include="..\..\src\lvec.h" />
+    <ClInclude Include="..\..\src\mathutils.h" />
+    <ClInclude Include="..\..\src\musicutils.h" />
+    <ClInclude Include="..\..\src\onset\onset.h" />
+    <ClInclude Include="..\..\src\onset\peakpicker.h" />
+    <ClInclude Include="..\..\src\pitch\pitch.h" />
+    <ClInclude Include="..\..\src\pitch\pitchfcomb.h" />
+    <ClInclude Include="..\..\src\pitch\pitchmcomb.h" />
+    <ClInclude Include="..\..\src\pitch\pitchschmitt.h" />
+    <ClInclude Include="..\..\src\pitch\pitchspecacf.h" />
+    <ClInclude Include="..\..\src\pitch\pitchyin.h" />
+    <ClInclude Include="..\..\src\pitch\pitchyinfft.h" />
+    <ClInclude Include="..\..\src\spectral\fft.h" />
+    <ClInclude Include="..\..\src\spectral\filterbank.h" />
+    <ClInclude Include="..\..\src\spectral\filterbank_mel.h" />
+    <ClInclude Include="..\..\src\spectral\mfcc.h" />
+    <ClInclude Include="..\..\src\spectral\phasevoc.h" />
+    <ClInclude Include="..\..\src\spectral\specdesc.h" />
+    <ClInclude Include="..\..\src\spectral\tss.h" />
+    <ClInclude Include="..\..\src\synth\sampler.h" />
+    <ClInclude Include="..\..\src\temporal\a_weighting.h" />
+    <ClInclude Include="..\..\src\temporal\biquad.h" />
+    <ClInclude Include="..\..\src\temporal\c_weighting.h" />
+    <ClInclude Include="..\..\src\temporal\filter.h" />
+    <ClInclude Include="..\..\src\temporal\resampler.h" />
+    <ClInclude Include="..\..\src\tempo\beattracking.h" />
+    <ClInclude Include="..\..\src\tempo\tempo.h" />
+    <ClInclude Include="..\..\src\types.h" />
+    <ClInclude Include="..\..\src\utils\hist.h" />
+    <ClInclude Include="..\..\src\utils\scale.h" />
+    <ClInclude Include="..\..\src\vecutils.h" />
+    <ClInclude Include="..\examples\AmplitudeFollower.h" />
+    <ClInclude Include="..\examples\FixedTempoEstimator.h" />
+    <ClInclude Include="..\examples\PercussionOnsetDetector.h" />
+    <ClInclude Include="..\examples\PowerSpectrum.h" />
+    <ClInclude Include="..\examples\SpectralCentroid.h" />
+    <ClInclude Include="..\examples\ZeroCrossing.h" />
+    <ClInclude Include="..\vamp-sdk\plugguard.h" />
+    <ClInclude Include="..\vamp-sdk\Plugin.h" />
+    <ClInclude Include="..\vamp-sdk\PluginAdapter.h" />
+    <ClInclude Include="..\vamp-sdk\PluginBase.h" />
+    <ClInclude Include="..\vamp-sdk\RealTime.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\cvec.c" />
+    <ClCompile Include="..\..\src\fmat.c" />
+    <ClCompile Include="..\..\src\fvec.c" />
+    <ClCompile Include="..\..\src\io\audio_unit.c" />
+    <ClCompile Include="..\..\src\io\sink.c" />
+    <ClCompile Include="..\..\src\io\sink_apple_audio.c" />
+    <ClCompile Include="..\..\src\io\sink_sndfile.c" />
+    <ClCompile Include="..\..\src\io\sink_wavwrite.c" />
+    <ClCompile Include="..\..\src\io\source.c" />
+    <ClCompile Include="..\..\src\io\source_apple_audio.c" />
+    <ClCompile Include="..\..\src\io\source_avcodec.c" />
+    <ClCompile Include="..\..\src\io\source_sndfile.c" />
+    <ClCompile Include="..\..\src\io\source_wavread.c" />
+    <ClCompile Include="..\..\src\io\utils_apple_audio.c" />
+    <ClCompile Include="..\..\src\lvec.c" />
+    <ClCompile Include="..\..\src\mathutils.c" />
+    <ClCompile Include="..\..\src\onset\onset.c" />
+    <ClCompile Include="..\..\src\onset\peakpicker.c" />
+    <ClCompile Include="..\..\src\pitch\pitch.c" />
+    <ClCompile Include="..\..\src\pitch\pitchfcomb.c" />
+    <ClCompile Include="..\..\src\pitch\pitchmcomb.c" />
+    <ClCompile Include="..\..\src\pitch\pitchschmitt.c" />
+    <ClCompile Include="..\..\src\pitch\pitchspecacf.c" />
+    <ClCompile Include="..\..\src\pitch\pitchyin.c" />
+    <ClCompile Include="..\..\src\pitch\pitchyinfft.c" />
+    <ClCompile Include="..\..\src\spectral\fft.c" />
+    <ClCompile Include="..\..\src\spectral\filterbank.c" />
+    <ClCompile Include="..\..\src\spectral\filterbank_mel.c" />
+    <ClCompile Include="..\..\src\spectral\mfcc.c" />
+    <ClCompile Include="..\..\src\spectral\ooura_fft8g.c" />
+    <ClCompile Include="..\..\src\spectral\phasevoc.c" />
+    <ClCompile Include="..\..\src\spectral\specdesc.c" />
+    <ClCompile Include="..\..\src\spectral\statistics.c" />
+    <ClCompile Include="..\..\src\spectral\tss.c" />
+    <ClCompile Include="..\..\src\synth\sampler.c" />
+    <ClCompile Include="..\..\src\temporal\a_weighting.c" />
+    <ClCompile Include="..\..\src\temporal\biquad.c" />
+    <ClCompile Include="..\..\src\temporal\c_weighting.c" />
+    <ClCompile Include="..\..\src\temporal\filter.c" />
+    <ClCompile Include="..\..\src\temporal\resampler.c" />
+    <ClCompile Include="..\..\src\tempo\beattracking.c" />
+    <ClCompile Include="..\..\src\tempo\tempo.c" />
+    <ClCompile Include="..\..\src\utils\hist.c" />
+    <ClCompile Include="..\..\src\utils\scale.c" />
+    <ClCompile Include="..\..\src\vecutils.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\wscript_build" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
