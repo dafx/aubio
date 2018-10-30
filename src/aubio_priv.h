@@ -70,14 +70,20 @@
 #include <stdarg.h>
 #endif
 
-#ifdef HAVE_ACCELERATE
+#if defined(HAVE_ACCELERATE)
 #define HAVE_ATLAS 1
+#define HAVE_BLAS 1
 #include <Accelerate/Accelerate.h>
 #elif defined(HAVE_ATLAS_CBLAS_H)
+#elif defined(HAVE_BLAS)
+#if defined(HAVE_ATLAS_CBLAS_H)
 #define HAVE_ATLAS 1
 #include <atlas/cblas.h>
-#else
-#undef HAVE_ATLAS
+#elif defined(HAVE_OPENBLAS_CBLAS_H)
+#include <openblas/cblas.h>
+#elif defined(HAVE_CBLAS_H)
+#include <cblas.h>
+#endif
 #endif
 
 #ifdef HAVE_ACCELERATE
@@ -85,6 +91,8 @@
 #ifndef HAVE_AUBIO_DOUBLE
 #define aubio_vDSP_mmov       vDSP_mmov
 #define aubio_vDSP_vmul       vDSP_vmul
+#define aubio_vDSP_vsmul      vDSP_vsmul
+#define aubio_vDSP_vsadd      vDSP_vsadd
 #define aubio_vDSP_vfill      vDSP_vfill
 #define aubio_vDSP_meanv      vDSP_meanv
 #define aubio_vDSP_sve        vDSP_sve
@@ -97,6 +105,8 @@
 #else /* HAVE_AUBIO_DOUBLE */
 #define aubio_vDSP_mmov       vDSP_mmovD
 #define aubio_vDSP_vmul       vDSP_vmulD
+#define aubio_vDSP_vsmul      vDSP_vsmulD
+#define aubio_vDSP_vsadd      vDSP_vsaddD
 #define aubio_vDSP_vfill      vDSP_vfillD
 #define aubio_vDSP_meanv      vDSP_meanvD
 #define aubio_vDSP_sve        vDSP_sveD
@@ -109,19 +119,23 @@
 #endif /* HAVE_AUBIO_DOUBLE */
 #endif /* HAVE_ACCELERATE */
 
-#ifdef HAVE_ATLAS
+#if defined(HAVE_BLAS)
 #ifndef HAVE_AUBIO_DOUBLE
+#ifdef HAVE_ATLAS
 #define aubio_catlas_set      catlas_sset
+#endif /* HAVE_ATLAS */
 #define aubio_cblas_copy      cblas_scopy
 #define aubio_cblas_swap      cblas_sswap
 #define aubio_cblas_dot       cblas_sdot
 #else /* HAVE_AUBIO_DOUBLE */
+#ifdef HAVE_ATLAS
 #define aubio_catlas_set      catlas_dset
+#endif /* HAVE_ATLAS */
 #define aubio_cblas_copy      cblas_dcopy
 #define aubio_cblas_swap      cblas_dswap
 #define aubio_cblas_dot       cblas_ddot
 #endif /* HAVE_AUBIO_DOUBLE */
-#endif /* HAVE_ATLAS */
+#endif /* HAVE_BLAS */
 
 #if defined HAVE_INTEL_IPP
 #include <ippcore.h>
@@ -156,8 +170,6 @@
 
 #if !defined(HAVE_MEMCPY_HACKS) && !defined(HAVE_ACCELERATE) && !defined(HAVE_ATLAS) && !defined(HAVE_INTEL_IPP)
 #define HAVE_NOOPT 1
-#else
-#undef HAVE_NOOPT
 #endif
 
 #include "types.h"
