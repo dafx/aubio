@@ -18,7 +18,7 @@
  *
  */
 
-#include "aubio_priv.h"
+#include "../aubio_priv.h"
 #include "fvec.h"
 #include "cvec.h"
 #include "mathutils.h"

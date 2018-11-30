@@ -18,7 +18,7 @@
 
 */
 
-#include "aubio_priv.h"
+#include "../aubio_priv.h"
 
 #ifdef HAVE_SINK_APPLE_AUDIO
 #include "fvec.h"

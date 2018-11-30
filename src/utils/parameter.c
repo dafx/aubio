@@ -18,7 +18,7 @@
 
 */
 
-#include "aubio_priv.h"
+#include "../aubio_priv.h"
 #include "parameter.h"
 
 #define AUBIO_PARAM_MAX_STEPS 2000

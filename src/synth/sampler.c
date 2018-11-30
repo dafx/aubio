@@ -19,7 +19,7 @@
 */
 
 
-#include "aubio_priv.h"
+#include "../aubio_priv.h"
 #include "fvec.h"
 #include "fmat.h"
 #include "io/source.h"

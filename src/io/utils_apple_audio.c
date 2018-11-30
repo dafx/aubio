@@ -1,4 +1,4 @@
-#include "aubio_priv.h"
+#include "../aubio_priv.h"
 
 #if defined(HAVE_SOURCE_APPLE_AUDIO) || defined(HAVE_SINK_APPLE_AUDIO)
 
