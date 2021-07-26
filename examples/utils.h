@@ -22,6 +22,8 @@
 
 #include "config.h"
 
+#define F_OK   0
+
 #ifdef HAVE_STDIO_H
 #include <stdio.h>              // for fprintf
 #endif
@@ -33,7 +35,6 @@
 #elif defined(HAVE_WIN_HACKS)
 #include <io.h>
 #define access _access
-#define F_OK   0
 #endif
 #ifdef HAVE_MATH_H
 #include <math.h>               // for isfinite
