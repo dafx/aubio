@@ -35,12 +35,14 @@ INCLUDEDIR?=$(PREFIX)/include
 DATAROOTDIR?=$(PREFIX)/share
 MANDIR?=$(DATAROOTDIR)/man
 
-# default nose2 command
-NOSE2?=nose2 -N 4 --verbose
+# default python test command
+PYTEST?=pytest --verbose
 
 SOX=sox
 
 TESTSOUNDS := python/tests/sounds
+
+LCOVOPTS += --rc lcov_branch_coverage=1
 
 all: build
 
@@ -138,9 +140,7 @@ test_python: export LD_LIBRARY_PATH=$(DESTDIR)/$(LIBDIR)
 test_python: export PYTHONPATH=$(PYDESTDIR)/$(LIBDIR)
 test_python: local_dylib
 	# run test with installed package
-	# ./python/tests/run_all_tests --verbose
-	# run with nose2, multiple processes
-	$(NOSE2)
+	$(PYTEST)
 
 clean_python:
 	./setup.py clean
@@ -234,26 +234,45 @@ test_python_only_clean: test_python_only \
 	uninstall_python \
 	check_clean_python
 
+coverage_cycle: coverage_zero_counters coverage_report
+
+coverage_zero_counters:
+	lcov --zerocounters --directory .
+
 coverage: export CFLAGS=--coverage
 coverage: export LDFLAGS=--coverage
 coverage: export PYTHONPATH=$(PWD)/python/lib
 coverage: export LD_LIBRARY_PATH=$(PWD)/build/src
 coverage: force_uninstall_python deps_python \
 	clean_python clean distclean build local_dylib
-	lcov --capture --no-external --directory . --output-file build/coverage_lib.info
+	# capture coverage after running c tests
+	lcov $(LCOVOPTS) --capture --no-external --directory . \
+		--output-file build/coverage_lib.info
+	# build and test python
 	pip install -v -e .
-	coverage run `which nose2`
-	lcov --capture --no-external --directory . --output-file build/coverage_python.info
-	lcov -a build/coverage_python.info -a build/coverage_lib.info -o build/coverage.info
+	# run tests, with python coverage
+	coverage run `which pytest`
+	# capture coverage again
+	lcov $(LCOVOPTS) --capture --no-external --directory . \
+		--output-file build/coverage_python.info
+	# merge both coverage info files
+	lcov $(LCOVOPTS) -a build/coverage_python.info -a build/coverage_lib.info \
+		--output-file build/coverage.info
+	# remove tests
+	lcov $(LCOVOPTS) --remove build/coverage.info '*/ooura_fft8g*' \
+		--output-file build/coverage_lib.info
 
+# make sure we don't build the doc, which builds a temporary python module
+coverage_report: export WAFOPTS += --disable-docs
 coverage_report: coverage
-	genhtml build/coverage.info --output-directory lcov_html
-	mkdir -p gcovr_html/
-	gcovr -r . --html --html-details \
-		--output gcovr_html/index.html \
-		--exclude ".*tests/.*" --exclude ".*examples/.*"
+	# generate report with lcov's genhtml
+	genhtml build/coverage_lib.info --output-directory build/coverage_c \
+		--branch-coverage --highlight --legend
+	# generate python report with coverage python package
 	coverage report
-	coverage html
+	coverage html -d build/coverage_python
+	# show links to generated reports
+	for i in $$(ls build/coverage_*/index.html); do echo file://$(PWD)/$$i; done
 
 sphinx: configure
 	$(WAFCMD) sphinx $(WAFOPTS)

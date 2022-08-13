@@ -5,6 +5,8 @@
 # gcov generated files
 *.gcno
 *.gcda
+python/lib/aubio/_aubio.*.so
+.coverage
 
 # ignore compiled examples
 RE:examples/[a-z]*
@@ -43,11 +45,10 @@ pip-delete-this-directory.txt
 aubio-*.tar.bz2
 aubio-*.zip
 dist/*.tar.gz
+dist/*.whl
 
 # test sounds
 python/tests/sounds
 aubio.egg-info
-
-tests/test/Builds/
-tests/test/JuceLibraryCode/
-
+.eggs
+.cache

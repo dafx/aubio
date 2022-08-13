@@ -1,13 +1,16 @@
 #include <aubio.h>
 #include "utils_tests.h"
 
+int test_wrong_params(void);
+
 int main (int argc, char **argv)
 {
   sint_t err = 0;
 
   if (argc < 3) {
     err = 2;
-    PRINT_ERR("not enough arguments\n");
+    PRINT_WRN("no arguments, running tests\n");
+    err = test_wrong_params();
     PRINT_MSG("usage: %s <input_path> <output_path> [samplerate] [hop_size]\n", argv[0]);
     return err;
   }
@@ -22,11 +25,6 @@ int main (int argc, char **argv)
 
   if ( argc >= 4 ) samplerate = atoi(argv[3]);
   if ( argc >= 5 ) hop_size = atoi(argv[4]);
-  if ( argc >= 6 ) {
-    err = 2;
-    PRINT_ERR("too many arguments\n");
-    return err;
-  }
 
   fvec_t *vec = new_fvec(hop_size);
   fvec_t *out = new_fvec(hop_size); // output buffer
@@ -43,9 +41,11 @@ int main (int argc, char **argv)
   if (!o) { err = 1; goto beach_sink; }
 
   aubio_pvoc_t *pv = new_aubio_pvoc(win_size, hop_size);
+  if (!pv) { err = 1; goto beach_pvoc; }
 
   aubio_spectral_whitening_t *awhitening =
     new_aubio_spectral_whitening (win_size, hop_size, samplerate);
+  if (!awhitening) { err = 1; goto beach_awhitening; }
 
   aubio_spectral_whitening_set_relax_time(awhitening, 20.);
   fvec_set_all(scale, 3.);
@@ -73,12 +73,39 @@ int main (int argc, char **argv)
       n_frames, samplerate, n_frames / hop_size,
       source_path, sink_path);
 
+  del_aubio_spectral_whitening(awhitening);
+beach_awhitening:
+  del_aubio_pvoc(pv);
+beach_pvoc:
   del_aubio_sink(o);
 beach_sink:
   del_aubio_source(i);
 beach_source:
   del_fvec(vec);
+  del_fvec(out);
+  del_fvec(scale);
+  del_cvec(fftgrain);
 beach_fvec:
   return err;
 }
 
+int test_wrong_params(void)
+{
+  uint_t buf_size = 512;
+  uint_t hop_size = 256;
+  uint_t samplerate = 44100;
+  aubio_spectral_whitening_t *o;
+
+  if (new_aubio_spectral_whitening(       0, hop_size, samplerate)) return 1;
+  if (new_aubio_spectral_whitening(buf_size,        0, samplerate)) return 1;
+  if (new_aubio_spectral_whitening(buf_size, hop_size,          0)) return 1;
+
+  o = new_aubio_spectral_whitening(buf_size, hop_size, samplerate);
+
+  aubio_spectral_whitening_get_relax_time(o);
+  aubio_spectral_whitening_get_floor(o);
+
+  del_aubio_spectral_whitening(o);
+
+  return run_on_default_source_and_sink(main);
+}

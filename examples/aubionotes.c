@@ -21,6 +21,7 @@
 #include "utils.h"
 #define PROG_HAS_PITCH 1
 #define PROG_HAS_ONSET 1
+#define PROG_HAS_NOTES 1
 #define PROG_HAS_SILENCE 1
 #define PROG_HAS_JACK 1
 // TODO add PROG_HAS_OUTPUT
@@ -82,8 +83,14 @@ int main(int argc, char **argv) {
           silence_threshold);
     }
   }
+  if (release_drop != 10.) {
+    if (aubio_notes_set_release_drop (notes, release_drop) != 0) {
+      errmsg ("failed setting notes release drop to %.2f\n",
+          release_drop);
+    }
+  }
 
-  examples_common_process((aubio_process_func_t)process_block, process_print);
+  examples_common_process(process_block, process_print);
 
   // send a last note off if required
   if (lastmidi) {

@@ -231,11 +231,21 @@ typedef struct{{
         return out.format(do_inputs_list = do_inputs_list, **self.__dict__)
 
     def gen_doc(self):
+        sig = []
+        for p in self.input_params:
+            name = p['name']
+            defval = aubiodefvalue[name].replace('"','\\\"')
+            sig.append("{name}={defval}".format(defval=defval, name=name))
         out = """
-// TODO: add documentation
-static char Py_{shortname}_doc[] = \"undefined\";
+#ifndef PYAUBIO_{shortname}_doc
+#define PYAUBIO_{shortname}_doc "{shortname}({sig})"
+#endif /* PYAUBIO_{shortname}_doc */
+
+static char Py_{shortname}_doc[] = ""
+PYAUBIO_{shortname}_doc
+"";
 """
-        return out.format(**self.__dict__)
+        return out.format(sig=', '.join(sig), **self.__dict__)
 
     def gen_new(self):
         out = """
@@ -462,30 +472,51 @@ Pyaubio_{shortname}_{method}  (Py_{shortname} * self, PyObject * args)
 // {shortname} setters
 """.format(**self.__dict__)
         for set_param in self.prototypes['set']:
-            params = get_params_types_names(set_param)[1]
-            paramtype = params['type']
+            params = get_params_types_names(set_param)[1:]
+            param = self.shortname.split('_set_')[-1]
+            paramdecls = "".join(["""
+   {0} {1};""".format(p['type'], p['name']) for p in params])
             method_name = get_name(set_param)
             param = method_name.split('aubio_'+self.shortname+'_set_')[-1]
-            pyparamtype = pyargparse_chars[paramtype]
+            refs = ", ".join(["&%s" % p['name'] for p in params])
+            paramlist = ", ".join(["%s" % p['name'] for p in params])
+            if len(params):
+                paramlist = "," + paramlist
+            pyparamtypes = ''.join([pyargparse_chars[p['type']] for p in params])
             out += """
 static PyObject *
 Pyaubio_{shortname}_set_{param} (Py_{shortname} *self, PyObject *args)
 {{
   uint_t err = 0;
-  {paramtype} {param};
+  {paramdecls}
+""".format(param = param, paramdecls = paramdecls, **self.__dict__)
 
-  if (!PyArg_ParseTuple (args, "{pyparamtype}", &{param})) {{
+            if len(refs) and len(pyparamtypes):
+                out += """
+
+  if (!PyArg_ParseTuple (args, "{pyparamtypes}", {refs})) {{
     return NULL;
   }}
-  err = aubio_{shortname}_set_{param} (self->o, {param});
+""".format(pyparamtypes = pyparamtypes, refs = refs)
+
+            out += """
+  err = aubio_{shortname}_set_{param} (self->o {paramlist});
 
   if (err > 0) {{
-    PyErr_SetString (PyExc_ValueError, "error running aubio_{shortname}_set_{param}");
+    if (PyErr_Occurred() == NULL) {{
+      PyErr_SetString (PyExc_ValueError, "error running aubio_{shortname}_set_{param}");
+    }} else {{
+      // change the RuntimeError into ValueError
+      PyObject *type, *value, *traceback;
+      PyErr_Fetch(&type, &value, &traceback);
+      PyErr_Restore(PyExc_ValueError, value, traceback);
+    }}
     return NULL;
   }}
   Py_RETURN_NONE;
 }}
-""".format(param = param, paramtype = paramtype, pyparamtype = pyparamtype, **self.__dict__)
+""".format(param = param, refs = refs, paramdecls = paramdecls,
+        pyparamtypes = pyparamtypes, paramlist = paramlist, **self.__dict__)
         return out
 
     def gen_get(self):

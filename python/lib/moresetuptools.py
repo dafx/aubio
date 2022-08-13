@@ -2,7 +2,7 @@
 #
 import sys, os, glob, subprocess
 import distutils, distutils.command.clean, distutils.dir_util
-from .gen_external import generate_external, header, output_path
+from gen_external import generate_external, header, output_path
 
 from this_version import get_aubio_version
 
@@ -68,7 +68,7 @@ def add_local_macros(ext, usedouble = False):
     # define macros (waf puts them in build/src/config.h)
     for define_macro in ['HAVE_STDLIB_H', 'HAVE_STDIO_H',
                          'HAVE_MATH_H', 'HAVE_STRING_H',
-                         'HAVE_C99_VARARGS_MACROS',
+                         'HAVE_ERRNO_H', 'HAVE_C99_VARARGS_MACROS',
                          'HAVE_LIMITS_H', 'HAVE_STDARG_H',
                          'HAVE_MEMCPY_HACKS']:
         ext.define_macros += [(define_macro, 1)]

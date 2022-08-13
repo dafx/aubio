@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import os
+import re
 import glob
 import numpy as np
 from tempfile import mkstemp
@@ -8,11 +9,8 @@ from tempfile import mkstemp
 DEFAULT_SOUND = '22050Hz_5s_brownnoise.wav'
 
 def array_from_text_file(filename, dtype = 'float'):
-    filename = os.path.join(os.path.dirname(__file__), filename)
-    with open(filename) as f:
-        lines = f.readlines()
-    return np.array([line.split() for line in lines],
-            dtype = dtype)
+    realpathname = os.path.join(os.path.dirname(__file__), filename)
+    return np.loadtxt(realpathname, dtype = dtype)
 
 def list_all_sounds(rel_dir):
     datadir = os.path.join(os.path.dirname(__file__), rel_dir)
@@ -38,13 +36,10 @@ def del_tmp_sink_path(path):
     try:
         os.unlink(path)
     except WindowsError as e:
-        print("deleting {:s} failed ({:s}), reopening".format(path, repr(e)))
-        with open(path, 'wb') as f:
-            f.close()
-        try:
-            os.unlink(path)
-        except WindowsError as f:
-            print("deleting {:s} failed ({:s}), aborting".format(path, repr(e)))
+        # removing the temporary directory sometimes fails on windows
+        import warnings
+        errmsg = "failed deleting temporary file {:s} ({:s})"
+        warnings.warn(UserWarning(errmsg.format(path, repr(e))))
 
 def array_from_yaml_file(filename):
     import yaml
@@ -83,3 +78,16 @@ def count_files_in_directory(samples_dir):
                 if file_path:
                     total_files += 1
     return total_files
+
+def parse_file_samplerate(soundfile):
+    samplerate = None
+    # parse samplerate
+    re_sr = re.compile(r'/([0-9]{4,})Hz_.*')
+    match_samplerate = re_sr.findall(soundfile)
+    if match_samplerate:
+        samplerate = int(match_samplerate[0])
+    else:
+        import warnings
+        warnings.warn(UserWarning("could not parse samplerate for {:s}"
+            .format(soundfile)))
+    return samplerate

@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-from unittest import main
 import numpy as np
 from numpy.testing import TestCase, assert_equal, assert_almost_equal
 from aubio import fvec, zero_crossing_rate, alpha_norm, min_removal
@@ -59,6 +58,14 @@ class aubio_fvec_wrong_values(TestCase):
         a = fvec(2)
         self.assertRaises(IndexError, a.__getitem__, 3)
         self.assertRaises(IndexError, a.__getitem__, 2)
+
+    def test_wrong_dimensions(self):
+        a = np.array([[[1, 2], [3, 4]]], dtype=float_type)
+        self.assertRaises(ValueError, fvec, a)
+
+    def test_wrong_size(self):
+        a = np.ndarray([0,], dtype=float_type)
+        self.assertRaises(ValueError, fvec, a)
 
 class aubio_wrong_fvec_input(TestCase):
     """ uses min_removal to test PyAubio_IsValidVector """
@@ -140,4 +147,5 @@ class aubio_fvec_test_memory(TestCase):
         del c
 
 if __name__ == '__main__':
+    from unittest import main
     main()

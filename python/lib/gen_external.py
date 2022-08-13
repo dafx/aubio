@@ -3,6 +3,8 @@ import sys
 import os
 import subprocess
 import glob
+from distutils.sysconfig import customize_compiler
+from gen_code import MappedObject
 
 header = os.path.join('src', 'aubio.h')
 output_path = os.path.join('python', 'gen')
@@ -49,7 +51,6 @@ default_skip_objects = [
 
 def get_preprocessor():
     # findout which compiler to use
-    from distutils.sysconfig import customize_compiler
     compiler_name = distutils.ccompiler.get_default_compiler()
     compiler = distutils.ccompiler.new_compiler(compiler=compiler_name)
     try:
@@ -73,6 +74,18 @@ def get_preprocessor():
         cpp_cmd = compiler.cc.split()
         cpp_cmd += ['-E']
 
+    # On win-amd64 (py3.x), the default compiler is cross-compiling, from x86
+    # to amd64 with %WIN_SDK_ROOT%\x86_amd64\cl.exe, but using this binary as a
+    # pre-processor generates no output, so we use %WIN_SDK_ROOT%\cl.exe
+    # instead.
+    if len(cpp_cmd) > 1 and 'cl.exe' in cpp_cmd[-2]:
+        plat = os.path.basename(os.path.dirname(cpp_cmd[-2]))
+        if plat == 'x86_amd64':
+            print('workaround on win64 to avoid empty pre-processor output')
+            cpp_cmd[-2] = cpp_cmd[-2].replace('x86_amd64', '')
+        elif True in ['amd64' in f for f in cpp_cmd]:
+            print('warning: not using workaround for', cpp_cmd[0], plat)
+
     if not cpp_cmd:
         print("Warning: could not guess preprocessor, using env's CC")
         cpp_cmd = os.environ.get('CC', 'cc').split()
@@ -85,6 +98,12 @@ def get_preprocessor():
 def get_c_declarations(header=header, usedouble=False):
     ''' return a dense and preprocessed  string of all c declarations implied by aubio.h
     '''
+    cpp_output = get_cpp_output(header=header, usedouble=usedouble)
+    return filter_cpp_output (cpp_output)
+
+
+def get_cpp_output(header=header, usedouble=False):
+    ''' find and run a C pre-processor on aubio.h '''
     cpp_cmd = get_preprocessor()
 
     macros = [('AUBIO_UNSTABLE', 1)]
@@ -105,14 +124,25 @@ def get_c_declarations(header=header, usedouble=False):
     assert proc, 'Proc was none'
     cpp_output = proc.stdout.read()
     err_output = proc.stderr.read()
+    if err_output:
+        print("Warning: preprocessor produced errors or warnings:\n%s" \
+                % err_output.decode('utf8'))
     if not cpp_output:
-        raise Exception("preprocessor output is empty:\n%s" % err_output)
-    elif err_output:
-        print("Warning: preprocessor produced warnings:\n%s" % err_output)
+        raise_msg = "preprocessor output is empty! Running command " \
+                + "\"%s\" failed" % " ".join(cpp_cmd)
+        if err_output:
+            raise_msg += " with stderr: \"%s\"" % err_output.decode('utf8')
+        else:
+            raise_msg += " with no stdout or stderr"
+        raise Exception(raise_msg)
     if not isinstance(cpp_output, list):
         cpp_output = [l.strip() for l in cpp_output.decode('utf8').split('\n')]
 
-    cpp_output = filter(lambda y: len(y) > 1, cpp_output)
+    return cpp_output
+
+def filter_cpp_output(cpp_raw_output):
+    ''' prepare cpp-output for parsing '''
+    cpp_output = filter(lambda y: len(y) > 1, cpp_raw_output)
     cpp_output = list(filter(lambda y: not y.startswith('#'), cpp_output))
 
     i = 1
@@ -245,10 +275,6 @@ def generate_external(header=header, output_path=output_path, usedouble=False, o
     # print_c_declarations_results(lib, c_declarations)
 
     sources_list = []
-    try:
-        from .gen_code import MappedObject
-    except (SystemError, ValueError):
-        from gen_code import MappedObject
     for o in lib:
         out = source_header
         mapped = MappedObject(lib[o], usedouble=usedouble)
